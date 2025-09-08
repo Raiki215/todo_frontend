@@ -3,7 +3,7 @@ import TaskCard from "@/components/tasks/TaskCard";
 import { useTaskStore } from "@/lib/store";
 
 export default function TaskList() {
-  const { selectedDate, tasks } = useTaskStore();
+  const { selectedDate, tasks, highlightTaskId } = useTaskStore();
   const items = tasks.filter((t) => t.date === selectedDate);
 
   return (
@@ -14,11 +14,13 @@ export default function TaskList() {
         items.map((it) => (
           <TaskCard
             key={it.id}
+            id={it.id}
             title={it.title}
             time={it.time}
             priority={it.priority}
             duration={it.duration}
             tags={it.tags}
+            highlight={highlightTaskId === it.id}
           />
         ))
       )}

@@ -7,7 +7,9 @@ import { todayStr } from "./date";
 type State = {
   selectedDate: string;
   tasks: Task[];
+  highlightTaskId: string | null;
   setDate: (d: string) => void;
+  setHighlightTaskId: (id: string | null) => void;
 };
 
 const seed: Task[] = [
@@ -80,5 +82,7 @@ function fmtOffset(deltaDays: number) {
 export const useTaskStore = create<State>((set) => ({
   selectedDate: todayStr(),
   tasks: seed,
+  highlightTaskId: null,
   setDate: (d) => set({ selectedDate: d }),
+  setHighlightTaskId: (id) => set({ highlightTaskId: id }),
 }));
