@@ -1,4 +1,3 @@
-// app/layout.tsx
 import "@/styles/globals.css";
 
 export const metadata = {
@@ -13,7 +12,7 @@ export default function RootLayout({
 }) {
   return (
     <html lang="ja">
-      <body className="min-h-screen bg-white">{children}</body>
+      <body className="min-h-screen bg-gray-50 text-gray-900">{children}</body>
     </html>
   );
 }
