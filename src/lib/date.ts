@@ -83,3 +83,21 @@ export function calculateTimeRemaining(date: string, time?: string): string {
     return "まもなく";
   }
 }
+
+/**
+ * 指定した日付から7日間の日付配列を返す
+ * @param startDate 開始日 (YYYY-MM-DD)
+ * @returns 7日間の日付文字列配列
+ */
+export function getWeekDates(startDate: string): string[] {
+  const dates: string[] = [];
+  const start = new Date(startDate);
+
+  for (let i = 0; i < 7; i++) {
+    const current = new Date(start);
+    current.setDate(start.getDate() + i);
+    dates.push(fmtDate(current));
+  }
+
+  return dates;
+}
