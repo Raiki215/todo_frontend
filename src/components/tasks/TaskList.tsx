@@ -21,6 +21,7 @@ export default function TaskList() {
             duration={it.duration}
             tags={it.tags}
             highlight={highlightTaskId === it.id}
+            date={it.date}
           />
         ))
       )}

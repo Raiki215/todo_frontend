@@ -3,6 +3,7 @@ import MiniCalendar from "@/components/calendar/MiniCalendar";
 import { useTaskStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { calcImportance } from "@/lib/types";
+import { calculateTimeRemaining } from "@/lib/date";
 
 export default function SidePanel() {
   const { tasks, setDate, setHighlightTaskId } = useTaskStore();
@@ -12,6 +13,15 @@ export default function SidePanel() {
     .map((t: Task) => ({ ...t, importance: calcImportance(t) }))
     .sort((a, b) => b.importance - a.importance)
     .slice(0, 3);
+
+  console.log(
+    "未完了タスク数:",
+    tasks.filter((t) => t.status === "未完了").length
+  );
+  console.log(
+    "優先度順タスク:",
+    topTasks.map((t) => ({ title: t.title, importance: t.importance }))
+  );
 
   return (
     <aside className="space-y-4">
@@ -35,8 +45,17 @@ export default function SidePanel() {
               }}
             >
               <div className="text-sm text-gray-700 truncate">{task.title}</div>
-              <div className="text-xs text-gray-500">
-                {"⭐️".repeat(task.priority)}
+              <div className="flex flex-col items-end text-xs text-gray-500">
+                {/* 残り時間を上に表示。期限切れは「残り」を付けず赤文字のみ */}
+                {calculateTimeRemaining(task.date, task.time) === "期限切れ" ? (
+                  <div className="font-bold text-red-600">期限切れ</div>
+                ) : (
+                  <div className="font-bold text-blue-600">
+                    {`残り${calculateTimeRemaining(task.date, task.time)}`}
+                  </div>
+                )}
+                {/* かかる時間（duration）を下に表示 */}
+                {task.duration && <div>{task.duration}分</div>}
               </div>
             </div>
           ))}

@@ -16,13 +16,26 @@ export default function MiniCalendar() {
   // 日付ごとの件数 / 重要タスク件数(優先度4以上)を集計
   const counts = useMemo(() => {
     const map: Record<string, { total: number; urgent: number }> = {};
-    tasks
-      .filter((t) => t.status === "未完了")
-      .forEach((t) => {
-        const m = (map[t.date] ||= { total: 0, urgent: 0 });
-        m.total += 1;
-        if (t.priority >= 4) m.urgent += 1;
-      });
+    const uncompletedTasks = tasks.filter((t) => t.status === "未完了");
+
+    console.log("全タスク数:", tasks.length);
+    console.log("未完了タスク数:", uncompletedTasks.length);
+    console.log(
+      "未完了タスクの日付:",
+      uncompletedTasks.map((t) => ({
+        title: t.title,
+        date: t.date,
+        priority: t.priority,
+      }))
+    );
+
+    uncompletedTasks.forEach((t) => {
+      const m = (map[t.date] ||= { total: 0, urgent: 0 });
+      m.total += 1;
+      if (t.priority >= 4) m.urgent += 1;
+    });
+
+    console.log("カウント結果:", map);
     return map;
   }, [tasks]);
 
@@ -46,7 +59,7 @@ export default function MiniCalendar() {
   };
 
   return (
-    <div className="rounded-2xl border border-gray-200 bg-white p-4 shadow-sm">
+    <div className="p-4 bg-white border border-gray-200 shadow-sm rounded-2xl">
       {/* ヘッダー（月移動） */}
       <div className="flex items-center justify-between mb-2">
         <button
@@ -67,7 +80,7 @@ export default function MiniCalendar() {
       </div>
 
       {/* 曜日 */}
-      <div className="grid grid-cols-7 gap-1 text-center text-xs text-gray-500 mb-1">
+      <div className="grid grid-cols-7 gap-1 mb-1 text-xs text-center text-gray-500">
         {["日", "月", "火", "水", "木", "金", "土"].map((w) => (
           <div key={w}>{w}</div>
         ))}
@@ -84,10 +97,11 @@ export default function MiniCalendar() {
 
           const c = counts[key];
           const showBadge = c && c.total > 0;
-          const badgeText = c?.urgent ? c.urgent : c?.total ?? 0;
-          const badgeClass = c?.urgent
-            ? "bg-red-500 text-white"
-            : "bg-gray-300 text-gray-800";
+          const badgeText = c?.total ?? 0; // 常に総数を表示
+          const badgeClass =
+            c?.urgent && c.urgent > 0
+              ? "bg-red-500 text-white" // 重要タスクがある場合は赤
+              : "bg-gray-300 text-gray-800"; // ない場合はグレー
 
           return (
             <button
@@ -113,7 +127,7 @@ export default function MiniCalendar() {
                 {d.getDate()}
               </div>
 
-              {/* 件数バッジ（重要タスクがあれば赤、なければグレー総数） */}
+              {/* 件数バッジ（常に総数表示、重要タスクがあれば赤丸、なければグレー丸） */}
               {showBadge && (
                 <div
                   className={

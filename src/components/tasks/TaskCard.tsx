@@ -1,5 +1,6 @@
 import React from "react";
 import { priorityBarClass } from "@/lib/constants";
+import { calculateTimeRemaining } from "@/lib/date";
 
 // グラデーション風の発光アニメーション
 const glowAnimation = `
@@ -39,6 +40,7 @@ export default function TaskCard({
   duration,
   tags,
   highlight,
+  date,
 }: {
   id: string;
   title: string;
@@ -47,8 +49,15 @@ export default function TaskCard({
   duration?: number;
   tags?: string[];
   highlight?: boolean;
+  date: string; // 残り時間計算のために必要
 }) {
   const [checked, setChecked] = React.useState(false);
+
+  // 残り時間を計算
+  const timeRemaining = calculateTimeRemaining(date, time);
+  
+  // 期限切れかどうかを判定
+  const isOverdue = timeRemaining === "期限切れ";
 
   const highlightStyle = highlight
     ? {
@@ -80,6 +89,10 @@ export default function TaskCard({
               {title}
             </div>
             <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-500">
+              {/* 残り時間を先頭に太文字で表示（期限切れの場合は赤文字） */}
+              <span className={`font-bold ${isOverdue ? 'text-red-600' : 'text-blue-600'}`}>
+                {isOverdue ? timeRemaining : `残り${timeRemaining}`}
+              </span>
               {time && <span>{time}</span>}
               <span>{"⭐️".repeat(priority ?? 3)}</span>
               {duration && <span>{duration}分</span>}
