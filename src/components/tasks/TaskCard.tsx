@@ -1,6 +1,8 @@
-import React from "react";
+import React, { useState } from "react";
 import { priorityBarClass } from "@/lib/constants";
 import { calculateTimeRemaining } from "@/lib/date";
+import { useTaskStore } from "@/lib/store";
+import KebabMenu from "./KebabMenu";
 
 // グラデーション風の発光アニメーション
 const glowAnimation = `
@@ -52,12 +54,33 @@ export default function TaskCard({
   date: string; // 残り時間計算のために必要
 }) {
   const [checked, setChecked] = React.useState(false);
+  const {
+    delete: deleteTask,
+    update: updateTask,
+    moveToTomorrow,
+  } = useTaskStore();
 
   // 残り時間を計算
   const timeRemaining = calculateTimeRemaining(date, time);
 
   // 期限切れかどうかを判定
   const isOverdue = timeRemaining === "期限切れ";
+
+  // メニューハンドラー
+  const handleEdit = () => {
+    // TODO: 編集ダイアログを開く処理
+    console.log("編集:", title);
+  };
+
+  const handleDelete = () => {
+    if (confirm(`「${title}」を削除しますか？`)) {
+      deleteTask(id);
+    }
+  };
+
+  const handleMoveToTomorrow = () => {
+    moveToTomorrow(id);
+  };
 
   const highlightStyle = highlight
     ? {
@@ -69,7 +92,7 @@ export default function TaskCard({
     <>
       {highlight && <style>{glowAnimation}</style>}
       <div
-        className={`relative p-4 overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl`}
+        className={`relative p-4 bg-white border border-gray-200 shadow-sm rounded-2xl`}
         style={highlightStyle}
       >
         {/* 優先度バー（完了時は灰色） */}
@@ -129,7 +152,11 @@ export default function TaskCard({
             )}
           </div>
           <div className="flex items-center gap-3">
-            <button className="text-gray-400">⋯</button>
+            <KebabMenu
+              onEdit={handleEdit}
+              onDelete={handleDelete}
+              onMoveToTomorrow={handleMoveToTomorrow}
+            />
           </div>
         </div>
       </div>

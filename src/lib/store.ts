@@ -12,6 +12,10 @@ type State = {
   setDate: (d: string) => void;
   setHighlightTaskId: (id: string | null) => void;
   setViewMode: (mode: "day" | "week") => void;
+  add: (task: Task) => void; // タスクを追加する関数
+  delete: (taskId: string) => void; // タスクを削除する関数
+  update: (taskId: string, updates: Partial<Task>) => void; // タスクを更新する関数
+  moveToTomorrow: (taskId: string) => void; // タスクを翌日に移動する関数
 };
 
 const seed: Task[] = [
@@ -182,4 +186,24 @@ export const useTaskStore = create<State>((set) => ({
   setDate: (d) => set({ selectedDate: d }),
   setHighlightTaskId: (id) => set({ highlightTaskId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),
+  add: (task) => set((state) => ({ tasks: [...state.tasks, task] })),
+  delete: (taskId) => set((state) => ({ 
+    tasks: state.tasks.filter(task => task.id !== taskId) 
+  })),
+  update: (taskId, updates) => set((state) => ({
+    tasks: state.tasks.map(task => 
+      task.id === taskId ? { ...task, ...updates } : task
+    )
+  })),
+  moveToTomorrow: (taskId) => set((state) => {
+    const tomorrow = new Date();
+    tomorrow.setDate(tomorrow.getDate() + 1);
+    const tomorrowStr = tomorrow.toISOString().split('T')[0];
+    
+    return {
+      tasks: state.tasks.map(task => 
+        task.id === taskId ? { ...task, date: tomorrowStr } : task
+      )
+    };
+  }),
 }));
