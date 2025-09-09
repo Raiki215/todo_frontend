@@ -87,7 +87,7 @@ export default function MiniCalendar() {
       </div>
 
       {/* 本体 */}
-      <div className="grid grid-cols-7 gap-1">
+      <div className="grid grid-cols-7 gap-1 sm:gap-2">
         {days.map((d) => {
           const key = fmtDate(d);
           const isCurMonth = d.getMonth() === month;
@@ -108,7 +108,7 @@ export default function MiniCalendar() {
               key={key}
               onClick={() => setDate(key)}
               className={[
-                "relative aspect-square rounded-xl text-sm transition",
+                "relative aspect-square rounded-xl text-xs sm:text-sm transition",
                 isSelected
                   ? "bg-blue-600 text-white hover:bg-blue-600"
                   : "hover:bg-gray-50",
@@ -117,22 +117,22 @@ export default function MiniCalendar() {
               ].join(" ")}
               aria-label={key}
             >
-              {/* 日付数字 */}
+              {/* 日付数字を真ん中に表示 */}
               <div
                 className={
-                  "absolute top-1 left-1 text-xs " +
-                  (isSelected ? "text-white/90" : "text-gray-700")
+                  "absolute inset-0 flex items-center justify-center text-xs sm:text-sm font-medium " +
+                  (isSelected ? "text-white" : "text-gray-700")
                 }
               >
                 {d.getDate()}
               </div>
 
-              {/* 件数バッジ（常に総数表示、重要タスクがあれば赤丸、なければグレー丸） */}
+              {/* 件数バッジを右上に表示（レスポンシブ対応） */}
               {showBadge && (
                 <div
                   className={
-                    "absolute bottom-1 right-1 h-[18px] min-w-[18px] px-1 rounded-full " +
-                    "text-[10px] leading-[18px] text-center " +
+                    "absolute top-0.5 right-0.5 sm:top-1 sm:right-1 h-[12px] min-w-[12px] sm:h-[16px] sm:min-w-[16px] px-0.5 sm:px-1 rounded-full " +
+                    "text-[8px] sm:text-[9px] leading-[12px] sm:leading-[16px] text-center " +
                     badgeClass
                   }
                   aria-hidden

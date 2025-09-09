@@ -55,7 +55,7 @@ export default function TaskCard({
 
   // 残り時間を計算
   const timeRemaining = calculateTimeRemaining(date, time);
-  
+
   // 期限切れかどうかを判定
   const isOverdue = timeRemaining === "期限切れ";
 
@@ -72,27 +72,45 @@ export default function TaskCard({
         className={`relative p-4 overflow-hidden bg-white border border-gray-200 shadow-sm rounded-2xl`}
         style={highlightStyle}
       >
-        {/* 優先度バー */}
+        {/* 優先度バー（完了時は灰色） */}
         <div
-          className={`absolute left-0 top-0 h-full w-1.5 ${priorityBarClass(
-            priority
-          )}`}
+          className={`absolute left-0 top-0 h-full w-1.5 ${
+            checked ? "bg-gray-400" : priorityBarClass(priority)
+          }`}
           aria-hidden
         />
         <div className="flex items-start justify-between gap-3 pl-2">
           <div className="flex-1">
-            <div
-              className={`font-semibold ${
-                checked ? "line-through text-gray-400" : "text-gray-800"
-              }`}
-            >
-              {title}
+            {/* タイトル行：チェックボックスを先頭に配置 */}
+            <div className="flex items-center gap-3 mb-2">
+              <input
+                type="checkbox"
+                className="flex-shrink-0 w-5 h-5 border-gray-300 rounded accent-green-300"
+                checked={checked}
+                onChange={() => setChecked(!checked)}
+                style={checked ? { accentColor: "#86efac" } : {}}
+              />
+              <div
+                className={`font-semibold ${
+                  checked ? "line-through text-gray-400" : "text-gray-800"
+                }`}
+              >
+                {title}
+              </div>
             </div>
-            <div className="flex flex-wrap items-center gap-2 mt-2 text-sm text-gray-500">
-              {/* 残り時間を先頭に太文字で表示（期限切れの場合は赤文字） */}
-              <span className={`font-bold ${isOverdue ? 'text-red-600' : 'text-blue-600'}`}>
-                {isOverdue ? timeRemaining : `残り${timeRemaining}`}
-              </span>
+            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
+              {/* 完了時は「完了」と緑文字、未完了時は残り時間を表示 */}
+              {checked ? (
+                <span className="font-bold text-green-600">完了</span>
+              ) : (
+                <span
+                  className={`font-bold ${
+                    isOverdue ? "text-red-600" : "text-blue-600"
+                  }`}
+                >
+                  {isOverdue ? timeRemaining : `残り${timeRemaining}`}
+                </span>
+              )}
               {time && <span>{time}</span>}
               <span>{"⭐️".repeat(priority ?? 3)}</span>
               {duration && <span>{duration}分</span>}
@@ -112,13 +130,6 @@ export default function TaskCard({
           </div>
           <div className="flex items-center gap-3">
             <button className="text-gray-400">⋯</button>
-            <input
-              type="checkbox"
-              className="w-5 h-5 border-gray-300 rounded accent-green-300"
-              checked={checked}
-              onChange={() => setChecked(!checked)}
-              style={checked ? { accentColor: "#86efac" } : {}}
-            />
           </div>
         </div>
       </div>
