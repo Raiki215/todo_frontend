@@ -8,8 +8,10 @@ type State = {
   selectedDate: string;
   tasks: Task[];
   highlightTaskId: string | null;
+  viewMode: "day" | "week"; // 表示モード
   setDate: (d: string) => void;
   setHighlightTaskId: (id: string | null) => void;
+  setViewMode: (mode: "day" | "week") => void;
 };
 
 const seed: Task[] = [
@@ -176,6 +178,8 @@ export const useTaskStore = create<State>((set) => ({
   selectedDate: todayStr(),
   tasks: seed,
   highlightTaskId: null,
+  viewMode: "day", // デフォルトは日表示
   setDate: (d) => set({ selectedDate: d }),
   setHighlightTaskId: (id) => set({ highlightTaskId: id }),
+  setViewMode: (mode) => set({ viewMode: mode }),
 }));

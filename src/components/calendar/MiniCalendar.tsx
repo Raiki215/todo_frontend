@@ -3,10 +3,10 @@
 
 import { useMemo } from "react";
 import { useTaskStore } from "../../lib/store";
-import { buildMonthGrid, addMonths, fmtDate, todayStr } from "../../lib/date";
+import { buildMonthGrid, addMonths, fmtDate, todayStr, getWeekDates } from "../../lib/date";
 
 export default function MiniCalendar() {
-  const { selectedDate, setDate, tasks } = useTaskStore();
+  const { selectedDate, setDate, tasks, viewMode } = useTaskStore();
   // currentは毎回最新のselectedDateを参照
   const current = new Date(selectedDate);
 
@@ -42,6 +42,11 @@ export default function MiniCalendar() {
   const year = current.getFullYear();
   const month = current.getMonth(); // 0-11
   const today = todayStr();
+  
+  // 週表示モードの場合の7日間を計算
+  const weekDates = useMemo(() => {
+    return viewMode === "week" ? getWeekDates(selectedDate) : [];
+  }, [viewMode, selectedDate]);
 
   const go = (diff: number) => {
     const base = new Date(selectedDate);
@@ -94,6 +99,8 @@ export default function MiniCalendar() {
           const isToday = key === today;
           // 選択状態はselectedDateと一致する日付
           const isSelected = key === selectedDate;
+          // 週表示モードで7日間の範囲に含まれるかどうか
+          const isInWeekRange = viewMode === "week" && weekDates.includes(key);
 
           const c = counts[key];
           const showBadge = c && c.total > 0;
@@ -111,6 +118,8 @@ export default function MiniCalendar() {
                 "relative aspect-square rounded-xl text-xs sm:text-sm transition",
                 isSelected
                   ? "bg-blue-600 text-white hover:bg-blue-600"
+                  : isInWeekRange
+                  ? "bg-blue-100 hover:bg-blue-200"
                   : "hover:bg-gray-50",
                 isCurMonth ? "" : "opacity-50",
                 isToday && !isSelected ? "ring-2 ring-blue-500" : "",
