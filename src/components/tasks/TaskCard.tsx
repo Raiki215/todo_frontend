@@ -3,6 +3,8 @@ import { priorityBarClass } from "@/lib/constants";
 import { calculateTimeRemaining } from "@/lib/date";
 import { useTaskStore } from "@/lib/store";
 import KebabMenu from "./KebabMenu";
+import TaskEditDialog from "./TaskEditDialog";
+import type { Task } from "@/lib/types";
 
 // グラデーション風の発光アニメーション
 const glowAnimation = `
@@ -54,6 +56,7 @@ export default function TaskCard({
   date: string; // 残り時間計算のために必要
 }) {
   const [checked, setChecked] = React.useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
   const {
     delete: deleteTask,
     update: updateTask,
@@ -66,10 +69,25 @@ export default function TaskCard({
   // 期限切れかどうかを判定
   const isOverdue = timeRemaining === "期限切れ";
 
+  // 現在のタスクオブジェクトを作成
+  const currentTask: Task = {
+    id,
+    title,
+    date,
+    time,
+    priority: priority || 3,
+    duration,
+    tags: tags || [],
+    status: checked ? "完了" : "未完了",
+  };
+
   // メニューハンドラー
   const handleEdit = () => {
-    // TODO: 編集ダイアログを開く処理
-    console.log("編集:", title);
+    setShowEditDialog(true);
+  };
+
+  const handleEditSubmit = (taskId: string, updates: Partial<Task>) => {
+    updateTask(taskId, updates);
   };
 
   const handleDelete = () => {
@@ -160,6 +178,14 @@ export default function TaskCard({
           </div>
         </div>
       </div>
+
+      {/* 編集ダイアログ */}
+      <TaskEditDialog
+        open={showEditDialog}
+        task={currentTask}
+        onClose={() => setShowEditDialog(false)}
+        onSubmit={handleEditSubmit}
+      />
     </>
   );
 }
