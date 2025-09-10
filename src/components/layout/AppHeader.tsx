@@ -49,7 +49,7 @@ export default function AppHeader() {
                 <path d="M3 10h18" />
               </svg>
             </button>
-            
+
             {/* アプリタイトル */}
             <h1 className="text-xl font-bold text-gray-900">TODO App</h1>
           </div>
@@ -76,7 +76,7 @@ export default function AppHeader() {
         onClose={() => setShowCalendarDrawer(false)}
         title="カレンダーとタスク"
       >
-        <SidePanel />
+        <SidePanel onDateSelect={() => setShowCalendarDrawer(false)} />
       </Drawer>
     </header>
   );

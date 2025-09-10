@@ -49,7 +49,6 @@ export default function Drawer({
         aria-label={title ?? "メニュー"}
       >
         <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
-          <div className="text-sm font-semibold">{title ?? "メニュー"}</div>
           <button
             onClick={onClose}
             className="text-gray-500 hover:text-gray-800"
@@ -57,6 +56,8 @@ export default function Drawer({
           >
             ×
           </button>
+          <div className="text-sm font-semibold">{title ?? "メニュー"}</div>
+          <div className="w-6"></div> {/* 右側のバランス調整用スペーサー */}
         </div>
         <div className="p-3 overflow-y-auto h-[calc(100%-56px)]">
           {children}

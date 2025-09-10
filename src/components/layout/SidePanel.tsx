@@ -5,7 +5,11 @@ import type { Task } from "@/lib/types";
 import { calcImportance } from "@/utils/taskUtils";
 import { calculateTimeRemaining } from "@/utils/date";
 
-export default function SidePanel() {
+interface SidePanelProps {
+  onDateSelect?: () => void; // 日付選択時のコールバック
+}
+
+export default function SidePanel({ onDateSelect }: SidePanelProps) {
   const { tasks, setDate, setHighlightTaskId } = useAppStore();
 
   const topTasks: (Task & { importance: number })[] = tasks
@@ -26,7 +30,7 @@ export default function SidePanel() {
   return (
     <aside className="space-y-4">
       {/* カレンダー（白背景） */}
-      <MiniCalendar />
+      <MiniCalendar onDateSelect={onDateSelect} />
 
       {/* 優先度の高いタスク（重要度順で3件） */}
       <div className="p-4 bg-white border border-gray-200 shadow-sm rounded-2xl">
@@ -42,6 +46,8 @@ export default function SidePanel() {
                 setDate(task.date);
                 setHighlightTaskId(task.id);
                 setTimeout(() => setHighlightTaskId(null), 2000);
+                // モバイル版の場合、タスク選択時にもカレンダーを閉じる
+                onDateSelect?.();
               }}
             >
               <div className="text-sm text-gray-700 truncate">{task.title}</div>

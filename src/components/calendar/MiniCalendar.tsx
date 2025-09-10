@@ -11,7 +11,11 @@ import {
   getWeekDates,
 } from "@/utils/date";
 
-export default function MiniCalendar() {
+interface MiniCalendarProps {
+  onDateSelect?: () => void; // 日付選択時のコールバック
+}
+
+export default function MiniCalendar({ onDateSelect }: MiniCalendarProps) {
   const { selectedDate, setDate, tasks, viewMode } = useAppStore();
   // currentは毎回最新のselectedDateを参照
   const current = new Date(selectedDate);
@@ -119,7 +123,11 @@ export default function MiniCalendar() {
           return (
             <button
               key={key}
-              onClick={() => setDate(key)}
+              onClick={() => {
+                setDate(key);
+                // モバイル版の場合、日付選択時にカレンダーを閉じる
+                onDateSelect?.();
+              }}
               className={[
                 "relative aspect-square rounded-xl text-xs sm:text-sm transition",
                 isSelected
