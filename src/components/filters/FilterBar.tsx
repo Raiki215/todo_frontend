@@ -1,24 +1,67 @@
 // src/components/filters/FilterBar.tsx
 "use client";
-import { useTaskStore } from "@/lib/store";
+import { useState } from "react";
+import { useAppStore } from "@/lib/store";
 
 export default function FilterBar() {
-  const { viewMode, setViewMode } = useTaskStore();
+  const { viewMode, setViewMode } = useAppStore();
+  const [showFilters, setShowFilters] = useState(false);
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
-      {/* モバイル版：追加ボタンを表示 */}
-      <div className="grid order-1 w-full grid-cols-1 gap-2 lg:hidden sm:grid-cols-2">
-        <button className="inline-flex items-center justify-center w-full gap-2 px-3 py-2 text-sm text-white bg-blue-600 rounded-lg shadow-sm hover:bg-blue-700">
-          音声で追加
+      {/* モバイル版：条件の追加ボタンと日/週切替を横並び */}
+      <div className="flex items-center justify-between lg:hidden">
+        <button
+          onClick={() => setShowFilters(!showFilters)}
+          className="inline-flex items-center gap-2 px-3 py-2 text-sm text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+        >
+          <svg
+            width="16"
+            height="16"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            className={`transition-transform ${
+              showFilters ? "rotate-180" : ""
+            }`}
+          >
+            <path d="M6 9l6 6 6-6" />
+          </svg>
+          条件の追加
         </button>
-        <button className="inline-flex items-center justify-center w-full gap-2 px-3 py-2 text-sm text-white bg-gray-800 rounded-lg shadow-sm hover:bg-gray-900">
-          手動で追加
-        </button>
+
+        {/* モバイル版日/週切替 */}
+        <div className="flex items-center gap-2">
+          <button
+            className={`px-3 py-2 text-sm rounded-lg ${
+              viewMode === "day"
+                ? "bg-blue-600 text-white"
+                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+            onClick={() => setViewMode("day")}
+          >
+            日表示
+          </button>
+          <button
+            className={`px-3 py-2 text-sm rounded-lg ${
+              viewMode === "week"
+                ? "bg-blue-600 text-white"
+                : "border border-gray-300 text-gray-700 hover:bg-gray-50"
+            }`}
+            onClick={() => setViewMode("week")}
+          >
+            週表示
+          </button>
+        </div>
       </div>
 
-      {/* セレクト群 */}
-      <div className="grid order-2 w-full grid-cols-1 gap-3 lg:order-none sm:grid-cols-3 lg:w-auto">
+      {/* フィルタ条件（モバイル：条件付き表示、デスクトップ：常時表示） */}
+      <div
+        className={`grid w-full grid-cols-1 gap-3 sm:grid-cols-3 lg:w-auto lg:grid ${
+          showFilters ? "grid" : "hidden lg:grid"
+        }`}
+      >
         <label className="text-sm text-gray-600">
           タグ:
           <select className="w-full px-2 py-2 mt-1 text-sm border border-gray-300 rounded-lg">
@@ -46,22 +89,22 @@ export default function FilterBar() {
         </label>
       </div>
 
-      {/* 日/週 切替 */}
-      <div className="flex items-center order-3 gap-2 lg:order-none">
-        <button 
+      {/* デスクトップ版日/週切替 */}
+      <div className="items-center hidden gap-2 lg:flex">
+        <button
           className={`px-3 py-2 text-sm rounded-lg ${
-            viewMode === "day" 
-              ? "bg-blue-600 text-white" 
+            viewMode === "day"
+              ? "bg-blue-600 text-white"
               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
           }`}
           onClick={() => setViewMode("day")}
         >
           日表示
         </button>
-        <button 
+        <button
           className={`px-3 py-2 text-sm rounded-lg ${
-            viewMode === "week" 
-              ? "bg-blue-600 text-white" 
+            viewMode === "week"
+              ? "bg-blue-600 text-white"
               : "border border-gray-300 text-gray-700 hover:bg-gray-50"
           }`}
           onClick={() => setViewMode("week")}

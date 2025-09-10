@@ -1,8 +1,9 @@
 "use client";
 
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Task } from "@/lib/types";
+import { getCurrentDate, getCurrentTime } from "@/utils/dateTime";
 
 /** 編集ダイアログのプロパティ */
 type Props = {
@@ -21,13 +22,17 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
   const [estimate, setEstimate] = useState<string>(""); // 表示は文字列で保持
   const [tagsInput, setTagsInput] = useState("");
 
-  // タスクが変更されたときにフォームを初期化
+  // input要素への参照
+  const dateInputRef = useRef<HTMLInputElement>(null);
+  const timeInputRef = useRef<HTMLInputElement>(null);
+
+  // タスクが変更されたときにフォームを初期化（空の時は現在時刻をデフォルトに）
   useEffect(() => {
     if (!open || !task) return;
     
     setTitle(task.title || "");
-    setDueDate(task.date || "");
-    setDueTime(task.time || "");
+    setDueDate(task.date || getCurrentDate());
+    setDueTime(task.time || getCurrentTime());
     setImportance(task.priority || 3);
     setEstimate(task.duration ? String(task.duration) : "");
     setTagsInput(task.tags ? task.tags.join(", ") : "");
@@ -120,21 +125,35 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm text-gray-700">締切日</label>
-              <input
-                type="date"
-                className="w-full px-3 py-2 mt-1 text-sm border border-gray-300 rounded-lg"
-                value={dueDate}
-                onChange={(e) => setDueDate(e.target.value)}
-              />
+              <div 
+                className="relative mt-1 cursor-pointer"
+                onClick={() => dateInputRef.current?.showPicker?.()}
+              >
+                <input
+                  ref={dateInputRef}
+                  type="date"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  value={dueDate}
+                  onChange={(e) => setDueDate(e.target.value)}
+                />
+                <div className="absolute inset-0 rounded-lg pointer-events-none"></div>
+              </div>
             </div>
             <div>
               <label className="block text-sm text-gray-700">時刻</label>
-              <input
-                type="time"
-                className="w-full px-3 py-2 mt-1 text-sm border border-gray-300 rounded-lg"
-                value={dueTime}
-                onChange={(e) => setDueTime(e.target.value)}
-              />
+              <div 
+                className="relative mt-1 cursor-pointer"
+                onClick={() => timeInputRef.current?.showPicker?.()}
+              >
+                <input
+                  ref={timeInputRef}
+                  type="time"
+                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                  value={dueTime}
+                  onChange={(e) => setDueTime(e.target.value)}
+                />
+                <div className="absolute inset-0 rounded-lg pointer-events-none"></div>
+              </div>
             </div>
           </div>
 
