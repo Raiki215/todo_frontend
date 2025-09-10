@@ -12,6 +12,17 @@ export interface Task {
   tags?: string[]; // タグ
 }
 
+export type NotificationType = "30min-warning" | "overdue";
+
+export interface Notification {
+  id: string;
+  type: NotificationType;
+  task: Task;
+  timestamp: Date;
+  message: string;
+  isRead: boolean;
+}
+
 export function calcImportance(task: Task): number {
   const today = new Date();
   const due = new Date(task.date);

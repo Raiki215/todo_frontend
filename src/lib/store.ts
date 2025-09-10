@@ -1,7 +1,7 @@
 // lib/store.ts
 "use client";
 import { create } from "zustand";
-import type { Task } from "./types";
+import type { Task, Notification } from "./types";
 import { todayStr } from "./date";
 
 type State = {
@@ -9,6 +9,8 @@ type State = {
   tasks: Task[];
   highlightTaskId: string | null;
   viewMode: "day" | "week"; // 表示モード
+  notifications: Notification[];
+  unreadCount: number;
   setDate: (d: string) => void;
   setHighlightTaskId: (id: string | null) => void;
   setViewMode: (mode: "day" | "week") => void;
@@ -16,6 +18,12 @@ type State = {
   delete: (taskId: string) => void; // タスクを削除する関数
   update: (taskId: string, updates: Partial<Task>) => void; // タスクを更新する関数
   moveToTomorrow: (taskId: string) => void; // タスクを翌日に移動する関数
+  // 通知関連のアクション
+  addNotification: (notification: Notification) => void;
+  removeNotification: (id: string) => void;
+  markAsRead: (id: string) => void;
+  clearAllNotifications: () => void;
+  updateUnreadCount: () => void;
 };
 
 const seed: Task[] = [
@@ -178,11 +186,66 @@ function fmtOffset(deltaDays: number) {
   return `${year}-${month}-${day}`;
 }
 
-export const useTaskStore = create<State>((set) => ({
-  selectedDate: todayStr(),
-  tasks: seed,
-  highlightTaskId: null,
-  viewMode: "day", // デフォルトは日表示
+// 仮の通知データ（テスト用）
+const createDummyNotifications = (): Notification[] => [
+  {
+    id: "dummy-1",
+    type: "30min-warning",
+    task: {
+      id: "dummy-task-1",
+      title: "重要な会議の準備",
+      date: "2025-09-10",
+      time: "14:30",
+      priority: 5,
+      status: "未完了"
+    },
+    timestamp: new Date(Date.now() - 5 * 60 * 1000), // 5分前
+    message: "30分前です",
+    isRead: false
+  },
+  {
+    id: "dummy-2", 
+    type: "overdue",
+    task: {
+      id: "dummy-task-2",
+      title: "レポート提出",
+      date: "2025-09-09",
+      time: "23:59",
+      priority: 4,
+      status: "未完了"
+    },
+    timestamp: new Date(Date.now() - 60 * 60 * 1000), // 1時間前
+    message: "期限切れ",
+    isRead: true
+  },
+  {
+    id: "dummy-3",
+    type: "30min-warning", 
+    task: {
+      id: "dummy-task-3",
+      title: "プレゼンテーション",
+      date: "2025-09-10",
+      time: "16:00",
+      priority: 3,
+      status: "未完了"
+    },
+    timestamp: new Date(Date.now() - 2 * 60 * 1000), // 2分前
+    message: "30分前です",
+    isRead: false
+  }
+];
+
+export const useTaskStore = create<State>((set, get) => {
+  const initialNotifications = createDummyNotifications();
+  const initialUnreadCount = initialNotifications.filter(n => !n.isRead).length;
+  
+  return {
+    selectedDate: todayStr(),
+    tasks: seed,
+    highlightTaskId: null,
+    viewMode: "day", // デフォルトは日表示
+    notifications: initialNotifications,
+    unreadCount: initialUnreadCount,
   setDate: (d) => set({ selectedDate: d }),
   setHighlightTaskId: (id) => set({ highlightTaskId: id }),
   setViewMode: (mode) => set({ viewMode: mode }),
@@ -206,4 +269,55 @@ export const useTaskStore = create<State>((set) => ({
       )
     };
   }),
-}));
+  // 通知関連のアクション
+  addNotification: (notification) => set((state) => {
+    // 同じタスクの同じ種類の通知は重複させない
+    const exists = state.notifications.some(n => 
+      n.task.id === notification.task.id && n.type === notification.type
+    );
+    if (exists) return state;
+    
+    const updated = [...state.notifications, notification];
+    // 最新10件のみ保持
+    const newNotifications = updated.slice(-10);
+    
+    return {
+      notifications: newNotifications,
+      unreadCount: newNotifications.filter(n => !n.isRead).length
+    };
+  }),
+  removeNotification: (id) => set((state) => {
+    const newNotifications = state.notifications.filter(n => n.id !== id);
+    return {
+      notifications: newNotifications,
+      unreadCount: newNotifications.filter(n => !n.isRead).length
+    };
+  }),
+  markAsRead: (id) => set((state) => {
+    console.log("Store markAsRead called for:", id);
+    const newNotifications = state.notifications.map(n => {
+      if (n.id === id) {
+        console.log(`通知 ${n.task.title} を既読に変更: ${n.isRead} -> true`);
+        return { ...n, isRead: true };
+      }
+      return n;
+    });
+    console.log("Store markAsRead - updated notifications:", newNotifications.map(n => ({ title: n.task.title, isRead: n.isRead })));
+    
+    const newUnreadCount = newNotifications.filter(n => !n.isRead).length;
+    console.log("Store markAsRead - new unread count:", newUnreadCount);
+    
+    return {
+      notifications: newNotifications,
+      unreadCount: newUnreadCount
+    };
+  }),
+  clearAllNotifications: () => set({
+    notifications: [],
+    unreadCount: 0
+  }),
+  updateUnreadCount: () => set((state) => ({
+    unreadCount: state.notifications.filter(n => !n.isRead).length
+  }))
+  };
+});

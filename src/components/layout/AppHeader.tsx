@@ -5,12 +5,12 @@ import { useState, useRef, useEffect } from "react";
 import Drawer from "@/components/layout/Drawer";
 import SidePanel from "@/components/layout/SidePanel";
 import NotificationPanel from "@/components/common/NotificationPanel";
-import { useNotifications } from "@/hooks/useNotifications";
+import { useTaskStore } from "@/lib/store";
 
 export default function AppHeader() {
   const [open, setOpen] = useState(false);
   const [showNotificationPanel, setShowNotificationPanel] = useState(false);
-  const { unreadCount } = useNotifications();
+  const { unreadCount } = useTaskStore(); // ストアから直接取得
   const notificationRef = useRef<HTMLDivElement>(null);
 
   // 外側クリック検知
@@ -84,6 +84,7 @@ export default function AppHeader() {
                     <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
                     <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
                   </svg>
+                  {/* NotificationPanelと同じ形式の通知数表示（右上に配置） */}
                   {unreadCount > 0 && (
                     <span className="absolute -top-1 -right-1 px-1 py-0.5 text-xs bg-red-500 text-white rounded-full min-w-[1.25rem] h-5 flex items-center justify-center">
                       {unreadCount}

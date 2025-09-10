@@ -1,6 +1,7 @@
 "use client";
 
-import { useNotifications } from "@/hooks/useNotifications";
+import { getTimeAgo } from "@/hooks/useNotifications";
+import { useTaskStore } from "@/lib/store";
 
 interface NotificationPanelProps {
   onClose?: () => void;
@@ -13,7 +14,7 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
     markAsRead,
     clearAllNotifications,
     unreadCount,
-  } = useNotifications();
+  } = useTaskStore();
 
   if (notifications.length === 0) {
     return (
@@ -55,9 +56,17 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
               className={`p-4 border-b border-gray-100 last:border-b-0 relative cursor-pointer hover:bg-gray-50 ${
                 notification.isRead ? "bg-white" : "bg-cyan-50"
               }`}
-              onClick={() =>
-                !notification.isRead && markAsRead(notification.id)
-              }
+              onClick={() => {
+                console.log(
+                  "通知クリック:",
+                  notification.id,
+                  "既読状態:",
+                  notification.isRead
+                );
+                if (!notification.isRead) {
+                  markAsRead(notification.id);
+                }
+              }}
             >
               <div className="flex items-start justify-between">
                 <div className="flex-1">
@@ -77,16 +86,16 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
                     {notification.task.title}
                   </p>
 
-                  {/* 期限情報 */}
-                  <p className="text-xs text-gray-600 mb-2">
-                    期限: {notification.task.date}{" "}
-                    {notification.task.time || "23:59"}
-                  </p>
-
-                  {/* 現在時刻 */}
-                  <p className="text-xs text-gray-500">
-                    {notification.timestamp.toLocaleString("ja-JP")}
-                  </p>
+                  {/* 期限情報と通知時間を横並びに */}
+                  <div className="flex justify-between items-center mb-2">
+                    <p className="text-xs text-gray-600">
+                      期限: {notification.task.date}{" "}
+                      {notification.task.time || "23:59"}
+                    </p>
+                    <p className="text-xs text-blue-600 font-medium">
+                      {getTimeAgo(notification.timestamp)}
+                    </p>
+                  </div>
                 </div>
 
                 {/* 閉じるボタン */}
@@ -110,16 +119,6 @@ export default function NotificationPanel({ onClose }: NotificationPanelProps) {
                   </svg>
                 </button>
               </div>
-
-              {/* 優先度表示 */}
-              {notification.task.priority && (
-                <div className="mt-2 flex items-center gap-1">
-                  <span className="text-xs text-gray-500">優先度:</span>
-                  <span className="text-xs">
-                    {"⭐️".repeat(notification.task.priority)}
-                  </span>
-                </div>
-              )}
             </div>
           ))}
         </div>
