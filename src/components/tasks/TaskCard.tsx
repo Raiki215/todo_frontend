@@ -1,9 +1,13 @@
 import React, { useState } from "react";
 import { priorityBarClass } from "@/lib/constants";
-import { calculateTimeRemaining } from "@/lib/date";
+import { calculateTimeRemaining } from "@/utils/date";
 import { useTaskStore } from "@/lib/store";
 import KebabMenu from "./KebabMenu";
 import TaskEditDialog from "./TaskEditDialog";
+import TaskCheckbox from "./TaskCheckbox";
+import TaskTitle from "./TaskTitle";
+import TaskMeta from "./TaskMeta";
+import TaskTags from "./TaskTags";
 import type { Task } from "@/lib/types";
 
 // グラデーション風の発光アニメーション
@@ -33,8 +37,11 @@ const glowAnimation = `
 `;
 
 /**
- * 見た目用のタスクカード。
- * 左端に優先度カラーの縦バーを表示。
+ * タスクカードコンポーネント
+ * 
+ * 個別のタスクを表示するカード
+ * チェックボックス、タイトル、メタ情報、タグ、メニューで構成
+ * ハイライト機能付き
  */
 export default function TaskCard({
   id,
@@ -58,9 +65,9 @@ export default function TaskCard({
   const [checked, setChecked] = React.useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
   const {
-    delete: deleteTask,
-    update: updateTask,
-    moveToTomorrow,
+    deleteTask,
+    updateTask,
+    moveTaskToTomorrow,
   } = useTaskStore();
 
   // 残り時間を計算
@@ -97,7 +104,7 @@ export default function TaskCard({
   };
 
   const handleMoveToTomorrow = () => {
-    moveToTomorrow(id);
+    moveTaskToTomorrow(id);
   };
 
   const highlightStyle = highlight
@@ -124,50 +131,26 @@ export default function TaskCard({
           <div className="flex-1">
             {/* タイトル行：チェックボックスを先頭に配置 */}
             <div className="flex items-center gap-3 mb-2">
-              <input
-                type="checkbox"
-                className="flex-shrink-0 w-5 h-5 border-gray-300 rounded accent-green-300"
+              <TaskCheckbox
                 checked={checked}
                 onChange={() => setChecked(!checked)}
-                style={checked ? { accentColor: "#86efac" } : {}}
+                taskId={id}
               />
-              <div
-                className={`font-semibold ${
-                  checked ? "line-through text-gray-400" : "text-gray-800"
-                }`}
-              >
-                {title}
-              </div>
+              <TaskTitle title={title} isCompleted={checked} />
             </div>
-            <div className="flex flex-wrap items-center gap-2 text-sm text-gray-500">
-              {/* 完了時は「完了」と緑文字、未完了時は残り時間を表示 */}
-              {checked ? (
-                <span className="font-bold text-green-600">完了</span>
-              ) : (
-                <span
-                  className={`font-bold ${
-                    isOverdue ? "text-red-600" : "text-blue-600"
-                  }`}
-                >
-                  {isOverdue ? timeRemaining : `残り${timeRemaining}`}
-                </span>
-              )}
-              {time && <span>{time}</span>}
-              <span>{"⭐️".repeat(priority ?? 3)}</span>
-              {duration && <span>{duration}分</span>}
-            </div>
-            {tags && tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-2">
-                {tags.map((t) => (
-                  <span
-                    key={t}
-                    className="px-2 py-1 text-xs text-gray-600 bg-gray-100 rounded-full"
-                  >
-                    {t}
-                  </span>
-                ))}
-              </div>
-            )}
+            
+            {/* メタ情報（時間、優先度など） */}
+            <TaskMeta
+              isCompleted={checked}
+              timeRemaining={timeRemaining}
+              isOverdue={isOverdue}
+              time={time}
+              priority={priority}
+              duration={duration}
+            />
+            
+            {/* タグ表示 */}
+            <TaskTags tags={tags || []} />
           </div>
           <div className="flex items-center gap-3">
             <KebabMenu
