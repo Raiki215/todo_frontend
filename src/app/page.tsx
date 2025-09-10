@@ -1,4 +1,10 @@
-// src/app/page.tsx
+/**
+ * ホームページコンポーネント
+ *
+ * アプリケーションのメインページ
+ * タスク一覧、フィルタ、作成機能を提供
+ */
+
 "use client";
 import { useState } from "react";
 import AppHeader from "@/components/layout/AppHeader";
@@ -8,36 +14,24 @@ import TaskList from "@/components/tasks/TaskList";
 import TaskCreateDialog, {
   TaskDraft,
 } from "@/components/tasks/TaskCreateDialog";
-import { useTaskStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
-
-// 日付を日本語形式でフォーマットする関数
-function formatJapaneseDate(dateStr: string): string {
-  const date = new Date(dateStr);
-  const year = date.getFullYear();
-  const month = date.getMonth() + 1;
-  const day = date.getDate();
-
-  const weekdays = ["日", "月", "火", "水", "木", "金", "土"];
-  const weekday = weekdays[date.getDay()];
-
-  return `${year}年${month}月${day}日${weekday}曜日`;
-}
+import { formatJapaneseDate } from "@/utils/date";
+import { generateTaskId } from "@/services/taskService";
 
 export default function HomePage() {
-  const { selectedDate, viewMode, add } = useTaskStore();
+  const { selectedDate, viewMode, addTask } = useAppStore();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
 
-  // TaskDraftをTask型に変換して保存
+  /**
+   * タスク作成処理
+   * TaskDraftをTask型に変換してストアに保存
+   */
   const handleTaskCreate = (draft: TaskDraft) => {
-    const uid = () =>
-      globalThis.crypto?.randomUUID?.() ??
-      `t_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`;
-
     const task: Task = {
-      id: uid(),
+      id: generateTaskId(),
       title: draft.title,
-      date: draft.dueAt ? draft.dueAt.split("T")[0] : selectedDate, // dueAtがあればその日付、なければ選択された日付
+      date: draft.dueAt ? draft.dueAt.split("T")[0] : selectedDate,
       time: draft.dueAt
         ? draft.dueAt.split("T")[1]?.substring(0, 5)
         : undefined,
@@ -47,23 +41,25 @@ export default function HomePage() {
       status: "未完了",
     };
 
-    add(task);
+    addTask(task);
   };
 
   return (
     <>
+      {/* ヘッダー */}
       <AppHeader />
 
+      {/* メインコンテンツ */}
       <div className="mx-auto w-full md:w-[clamp(720px,92vw,1400px)] lg:w-[clamp(1040px,92vw,1400px)] px-4 sm:px-6 xl:px-8 pt-4 sm:pt-6">
         <div className="grid grid-cols-1 lg:grid-cols-[380px_1fr] gap-4 sm:gap-6 xl:gap-8">
-          {/* 左ペイン：デスクトップのみ */}
+          {/* 左ペイン：デスクトップのみ表示 */}
           <div className="hidden lg:block">
             <SidePanel />
           </div>
 
           {/* 右メイン */}
           <section className="space-y-4">
-            {/* タイトル行：PC版では右側にボタンを配置 */}
+            {/* タイトル行 */}
             <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
               {/* タイトル：選択された日付を動的に表示 */}
               <h1 className="text-xl font-bold text-gray-800 sm:text-2xl">
@@ -86,10 +82,10 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* フィルタ＆アクション（内部でモバイル最適化） */}
+            {/* フィルタ＆アクション */}
             <FilterBar />
 
-            {/* タスクリスト（既存のカードでOK） */}
+            {/* タスクリスト */}
             <TaskList />
           </section>
         </div>

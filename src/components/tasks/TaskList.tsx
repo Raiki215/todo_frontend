@@ -1,7 +1,7 @@
 "use client";
 import TaskCard from "@/components/tasks/TaskCard";
 import { useTaskStore } from "@/lib/store";
-import { getWeekDates } from "@/lib/date";
+import { getWeekDates } from "@/utils/date";
 
 export default function TaskList() {
   const { selectedDate, tasks, highlightTaskId, viewMode } = useTaskStore();
@@ -15,7 +15,7 @@ export default function TaskList() {
   return (
     <div className="space-y-4">
       {items.length === 0 ? (
-        <div className="text-gray-400 text-sm">
+        <div className="text-sm text-gray-400">
           {viewMode === "week"
             ? "この週にタスクはありません"
             : "タスクはありません"}

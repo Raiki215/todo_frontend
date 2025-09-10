@@ -1,12 +1,12 @@
 "use client";
 import MiniCalendar from "@/components/calendar/MiniCalendar";
-import { useTaskStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
-import { calcImportance } from "@/lib/types";
-import { calculateTimeRemaining } from "@/lib/date";
+import { calcImportance } from "@/utils/taskUtils";
+import { calculateTimeRemaining } from "@/utils/date";
 
 export default function SidePanel() {
-  const { tasks, setDate, setHighlightTaskId } = useTaskStore();
+  const { tasks, setDate, setHighlightTaskId } = useAppStore();
 
   const topTasks: (Task & { importance: number })[] = tasks
     .filter((t: Task) => t.status === "未完了")

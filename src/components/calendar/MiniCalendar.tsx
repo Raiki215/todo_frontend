@@ -2,11 +2,17 @@
 "use client";
 
 import { useMemo } from "react";
-import { useTaskStore } from "../../lib/store";
-import { buildMonthGrid, addMonths, fmtDate, todayStr, getWeekDates } from "../../lib/date";
+import { useAppStore } from "@/lib/store";
+import {
+  buildMonthGrid,
+  addMonths,
+  fmtDate,
+  todayStr,
+  getWeekDates,
+} from "@/utils/date";
 
 export default function MiniCalendar() {
-  const { selectedDate, setDate, tasks, viewMode } = useTaskStore();
+  const { selectedDate, setDate, tasks, viewMode } = useAppStore();
   // currentは毎回最新のselectedDateを参照
   const current = new Date(selectedDate);
 
@@ -42,7 +48,7 @@ export default function MiniCalendar() {
   const year = current.getFullYear();
   const month = current.getMonth(); // 0-11
   const today = todayStr();
-  
+
   // 週表示モードの場合の7日間を計算
   const weekDates = useMemo(() => {
     return viewMode === "week" ? getWeekDates(selectedDate) : [];

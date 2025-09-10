@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { useTaskStore } from "@/lib/store";
+import { useAppStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 
 type NotificationType = "30min-warning" | "overdue";
@@ -35,7 +35,7 @@ export function getTimeAgo(timestamp: Date): string {
 }
 
 export function useNotifications() {
-  const { tasks } = useTaskStore();
+  const { tasks, notificationsEnabled } = useAppStore();
 
   // 強制更新用のカウンター
   const [forceUpdate, setForceUpdate] = useState(0);
@@ -104,17 +104,25 @@ export function useNotifications() {
   }, []);
 
   // 通知を表示
-  const showNotification = useCallback((notification: Notification) => {
-    if ("Notification" in window && Notification.permission === "granted") {
-      new Notification(`TODOアプリ: ${notification.message}`, {
-        body: `タスク: ${
-          notification.task.title
-        }\n現在時刻: ${notification.timestamp.toLocaleString("ja-JP")}`,
-        icon: "/favicon.ico",
-        tag: notification.id,
-      });
-    }
-  }, []);
+  const showNotification = useCallback(
+    (notification: Notification) => {
+      // 通知が有効で、ブラウザ通知許可がある場合のみ送信
+      if (
+        notificationsEnabled &&
+        "Notification" in window &&
+        Notification.permission === "granted"
+      ) {
+        new Notification(`TODOアプリ: ${notification.message}`, {
+          body: `タスク: ${
+            notification.task.title
+          }\n現在時刻: ${notification.timestamp.toLocaleString("ja-JP")}`,
+          icon: "/favicon.ico",
+          tag: notification.id,
+        });
+      }
+    },
+    [notificationsEnabled]
+  );
 
   // 通知を追加
   const addNotification = useCallback(
