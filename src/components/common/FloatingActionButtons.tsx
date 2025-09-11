@@ -15,6 +15,7 @@ import { useAppStore } from "@/lib/store";
 import type { Task } from "@/lib/types";
 import { formatJapaneseDate } from "@/utils/date";
 import { generateTaskId } from "@/services/taskService";
+import recognizeVoice from "@/components/tasks/VoiceDialog";
 
 export default function FloatingActionButtons() {
   const { selectedDate, addTask } = useAppStore();
@@ -45,20 +46,67 @@ export default function FloatingActionButtons() {
   /**
    * 音声追加処理（将来実装）
    */
-  const handleVoiceAdd = () => {
-    // TODO: 音声認識機能の実装
-    console.log("音声追加機能は将来実装予定");
-    alert("音声追加機能は将来実装予定です");
+  const handleVoiceAdd = async () => {
+    try {
+      const result = await recognizeVoice();
+      if (!result || result.trim() === "") {
+        alert("音声が認識されませんでした。");
+        return;
+      }
+      const response = await fetch("http://127.0.0.1:5000/insert_todo", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ text: result }),
+      });
+      if (response.status === 401) {
+        alert("ログインしてください");
+      } else if (response.status === 201) {
+        const data = await response.json();
+        const todo = data.todo;
+        console.log("APIレスポンス:", data);
+        console.log("todo_info:", todo);
+        let date = "";
+        let time = "";
+        if (todo.deadline) {
+          const [d, t] = todo.deadline.split(" ");
+          date = d;
+          time = t ? t.substring(0, 5) : "00:00";
+        }
+        console.log(date);
+        console.log(time);
+        addTask({
+          id: todo.todo_id,
+          title: todo.todo,
+          date: date,
+          priority: todo.priority,
+          duration: todo.estimated_time,
+          tags: todo.tags,
+          time: time,
+          status: "未完了",
+        });
+        alert("タスク登録成功");
+      } else {
+        alert("タスク登録失敗");
+      }
+      console.log(result);
+    } catch (err) {
+      alert("音声認識エラー" + err);
+    }
+    // // TODO: 音声認識機能の実装
+    // console.log("音声追加機能は将来実装予定");
+    // alert("音声追加機能は将来実装予定です");
   };
 
   return (
     <>
       {/* フローティングアクションボタン群 */}
-      <div className="fixed bottom-6 right-6 z-40 flex flex-row gap-3 sm:flex-col">
+      <div className="fixed z-40 flex flex-row gap-3 bottom-6 right-6 sm:flex-col">
         {/* 音声追加ボタン（スマホ：左、デスクトップ：上） */}
         <button
           onClick={handleVoiceAdd}
-          className="flex items-center justify-center w-14 h-14 bg-blue-600 text-white rounded-full shadow-lg hover:bg-blue-700 hover:shadow-xl transition-all duration-200 active:scale-95"
+          className="flex items-center justify-center text-white transition-all duration-200 bg-blue-600 rounded-full shadow-lg w-14 h-14 hover:bg-blue-700 hover:shadow-xl active:scale-95"
           aria-label="音声でタスクを追加"
           title="音声でタスクを追加"
         >
@@ -81,7 +129,7 @@ export default function FloatingActionButtons() {
         {/* 手動追加ボタン（スマホ：右、デスクトップ：下） */}
         <button
           onClick={() => setShowCreateDialog(true)}
-          className="flex items-center justify-center w-14 h-14 bg-gray-800 text-white rounded-full shadow-lg hover:bg-gray-900 hover:shadow-xl transition-all duration-200 active:scale-95"
+          className="flex items-center justify-center text-white transition-all duration-200 bg-gray-800 rounded-full shadow-lg w-14 h-14 hover:bg-gray-900 hover:shadow-xl active:scale-95"
           aria-label="手動でタスクを追加"
           title="手動でタスクを追加"
         >
