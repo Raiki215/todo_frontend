@@ -80,7 +80,7 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
     { label: "勉強", title: "学習・資格", est: 60, imp: 4, tag: "学習" },
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     const tags = tagsInput
       .split(",")
       .map((s) => s.trim())
@@ -88,16 +88,35 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
 
     const dueAt = dueDate ? `${dueDate}T${dueTime || "23:59"}` : null;
 
-    const draft: TaskDraft = {
-      title: title.trim() || "無題",
-      dueAt,
-      importance,
-      estimatedMinutes: estimate ? Number(estimate) : null,
-      tags,
-    };
+    const response = await fetch("http://127.0.0.1:5000/manual_insert_todo", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        todo: title.trim(),
+        deadline: dueAt,
+        priority: importance,
+        estimated_time: estimate ? Number(estimate) : null,
+        tags,
+      }),
+    });
 
-    onSubmit?.(draft);
-    onClose();
+    if (response.status === 401) {
+      alert("ログインしてください");
+    } else if (response.status === 201) {
+      const data = await response.json();
+      const draft: TaskDraft = {
+        title: title.trim() || "無題",
+        dueAt,
+        importance,
+        estimatedMinutes: estimate ? Number(estimate) : null,
+        tags,
+      };
+      console.log(data);
+      onSubmit?.(draft);
+      onClose();
+    }
   };
 
   // Portal mount
