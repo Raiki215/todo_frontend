@@ -104,3 +104,54 @@ export interface SortOptions {
   /** ソート順 */
   order: "asc" | "desc";
 }
+
+/**
+ * ユーザーエンティティ
+ * 認証とユーザー管理に使用
+ */
+export interface User {
+  /** ユーザーの一意識別子 */
+  id: string;
+  /** ユーザー名 */
+  name: string;
+  /** メールアドレス */
+  email: string;
+}
+
+/**
+ * ログインフォームのデータ
+ */
+export interface LoginData {
+  /** メールアドレス */
+  email: string;
+  /** パスワード */
+  password: string;
+}
+
+/**
+ * アカウント登録フォームのデータ
+ */
+export interface RegisterData {
+  /** ユーザー名 */
+  name: string;
+  /** メールアドレス */
+  email: string;
+  /** パスワード */
+  password: string;
+  /** パスワード確認 */
+  confirmPassword: string;
+}
+
+/**
+ * 認証状態
+ */
+export interface AuthState {
+  /** 現在のユーザー */
+  user: User | null;
+  /** 認証済みかどうか */
+  isAuthenticated: boolean;
+  /** 認証処理中かどうか */
+  isLoading: boolean;
+  /** 認証エラーメッセージ */
+  error: string | null;
+}
