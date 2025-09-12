@@ -15,6 +15,78 @@ import SidePanel from "@/components/layout/SidePanel";
 import { useAppStore } from "@/lib/store";
 
 /**
+ * ユーザーメニューコンポーネント
+ * ユーザー情報表示とログアウト機能
+ */
+function UserMenu() {
+  const [showMenu, setShowMenu] = useState(false);
+  const { auth, logout } = useAppStore();
+
+  const handleLogout = async () => {
+    await logout();
+    setShowMenu(false);
+  };
+
+  if (!auth.user) {
+    return null;
+  }
+
+  return (
+    <div className="relative">
+      {/* ユーザーアバター */}
+      <button
+        onClick={() => setShowMenu(!showMenu)}
+        className="flex items-center space-x-2 text-sm bg-white rounded-full border border-gray-200 px-3 py-2 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+      >
+        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+          {auth.user.name.charAt(0)}
+        </div>
+        <span className="hidden sm:block text-gray-700">{auth.user.name}</span>
+        <svg
+          className="w-4 h-4 text-gray-400"
+          fill="none"
+          stroke="currentColor"
+          viewBox="0 0 24 24"
+        >
+          <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M19 9l-7 7-7-7"
+          />
+        </svg>
+      </button>
+
+      {/* ドロップダウンメニュー */}
+      {showMenu && (
+        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+          <div className="py-1">
+            <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+              <div className="font-medium text-gray-900">{auth.user.name}</div>
+              <div className="text-xs">{auth.user.email}</div>
+            </div>
+            <button
+              onClick={handleLogout}
+              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+            >
+              ログアウト
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* メニュー外クリック時のオーバーレイ */}
+      {showMenu && (
+        <div
+          className="fixed inset-0 z-40"
+          onClick={() => setShowMenu(false)}
+        />
+      )}
+    </div>
+  );
+}
+
+/**
  * アプリケーションヘッダー
  * タイトル、通知ボタン、通知パネルを表示
  */
@@ -56,6 +128,9 @@ export default function AppHeader() {
 
           {/* 右側のメニューエリア */}
           <div className="flex items-center space-x-2">
+            {/* ユーザー情報とログアウト */}
+            <UserMenu />
+
             {/* 通知ボタン */}
             <NotificationButton
               onClick={() => setShowNotifications(!showNotifications)}

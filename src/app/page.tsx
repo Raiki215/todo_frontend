@@ -11,6 +11,7 @@ import SidePanel from "@/components/layout/SidePanel";
 import FilterBar from "@/components/filters/FilterBar";
 import TaskList from "@/components/tasks/TaskList";
 import FloatingActionButtons from "@/components/common/FloatingActionButtons";
+import AuthGuard from "@/components/auth/AuthGuard";
 import { useAppStore } from "@/lib/store";
 import { formatJapaneseDate } from "@/utils/date";
 
@@ -18,7 +19,7 @@ export default function HomePage() {
   const { selectedDate, viewMode } = useAppStore();
 
   return (
-    <>
+    <AuthGuard>
       {/* ヘッダー */}
       <AppHeader />
 
@@ -53,6 +54,6 @@ export default function HomePage() {
 
       {/* フローティングアクションボタン */}
       <FloatingActionButtons />
-    </>
+    </AuthGuard>
   );
 }
