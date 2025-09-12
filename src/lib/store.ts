@@ -7,10 +7,11 @@
 
 "use client";
 import { create } from "zustand";
-import type { Task, Notification, ViewMode } from "./types";
+import type { Task, Notification, ViewMode, User, AuthState } from "./types";
 import { todayStr } from "@/utils/date";
 import { mockTasks } from "@/data/mockTasks";
 import { createMockNotifications } from "@/data/mockNotifications";
+import { authService } from "@/services/authService";
 
 /**
  * アプリケーション状態の型定義
@@ -33,6 +34,10 @@ interface AppState {
   unreadCount: number;
   /** 通知機能の有効/無効状態 */
   notificationsEnabled: boolean;
+
+  // 認証関連の状態
+  /** 認証状態 */
+  auth: AuthState;
 
   // アクション（タスク関連）
   /** 選択日付を変更 */
@@ -63,13 +68,29 @@ interface AppState {
   clearAllNotifications: () => void;
   /** 未読通知数を再計算 */
   updateUnreadCount: () => void;
+
+  // アクション（認証関連）
+  /** ユーザー情報を設定 */
+  setUser: (user: User | null) => void;
+  /** 認証ローディング状態を設定 */
+  setAuthLoading: (loading: boolean) => void;
+  /** 認証エラーを設定 */
+  setAuthError: (error: string | null) => void;
+  /** 認証状態をクリア */
+  clearAuth: () => void;
+  /** 認証状態を初期化 */
+  initializeAuth: () => Promise<void>;
+  /** ログイン */
+  login: (email: string, password: string) => Promise<User>;
+  /** ログアウト */
+  logout: () => Promise<void>;
 }
 
 /**
  * アプリケーション状態ストア
  * 全コンポーネントから参照可能なグローバル状態
  */
-export const useAppStore = create<AppState>((set) => {
+export const useAppStore = create<AppState>((set, get) => {
   // 初期通知データを作成
   const initialNotifications = createMockNotifications();
   const initialUnreadCount = initialNotifications.filter(
@@ -85,6 +106,14 @@ export const useAppStore = create<AppState>((set) => {
     notifications: initialNotifications,
     unreadCount: initialUnreadCount,
     notificationsEnabled: true, // デフォルトで通知有効
+
+    // 認証関連の初期状態
+    auth: {
+      user: null,
+      isAuthenticated: false,
+      isLoading: false, // 初期状態はローディングしない
+      error: null,
+    },
 
     // タスク関連のアクション
     setDate: (date) => set({ selectedDate: date }),
@@ -199,6 +228,92 @@ export const useAppStore = create<AppState>((set) => {
       set((state) => ({
         unreadCount: state.notifications.filter((n) => !n.isRead).length,
       })),
+
+    // 認証関連のアクション
+    setUser: (user) => {
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          user,
+          isAuthenticated: user !== null,
+          error: null,
+        },
+      }));
+    },
+
+    setAuthLoading: (loading) =>
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          isLoading: loading,
+        },
+      })),
+
+    setAuthError: (error) =>
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          error,
+          isLoading: false,
+        },
+      })),
+
+    clearAuth: () =>
+      set((state) => ({
+        auth: {
+          ...state.auth,
+          user: null,
+          isAuthenticated: false,
+          error: null,
+          isLoading: false,
+        },
+      })),
+
+    initializeAuth: async () => {
+      const { setUser, setAuthLoading } = get();
+      setAuthLoading(true);
+
+      try {
+        const user = await authService.verifySession();
+        setUser(user);
+      } catch (error) {
+        setUser(null);
+      } finally {
+        setAuthLoading(false);
+      }
+    },
+
+    login: async (email, password) => {
+      const { setAuthLoading, setAuthError, setUser } = get();
+      setAuthLoading(true);
+      setAuthError(null);
+
+      try {
+        const user = await authService.login({ email, password });
+        setUser(user);
+        return user;
+      } catch (error) {
+        const errorMessage =
+          error instanceof Error ? error.message : "ログインに失敗しました";
+        setAuthError(errorMessage);
+        throw error;
+      } finally {
+        setAuthLoading(false);
+      }
+    },
+
+    logout: async () => {
+      const { setAuthLoading, clearAuth } = get();
+      setAuthLoading(true);
+
+      try {
+        await authService.logout();
+      } catch (error) {
+        console.error("Logout error:", error);
+      } finally {
+        clearAuth();
+      }
+    },
   };
 });
 
