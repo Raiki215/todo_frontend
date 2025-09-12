@@ -100,6 +100,7 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
         estimated_time: estimate ? Number(estimate) : null,
         tags,
       }),
+      credentials: "include",
     });
 
     if (response.status === 401) {

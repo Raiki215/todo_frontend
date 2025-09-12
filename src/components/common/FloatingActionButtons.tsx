@@ -59,6 +59,7 @@ export default function FloatingActionButtons() {
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ text: result }),
+        credentials: "include",
       });
       if (response.status === 401) {
         alert("ログインしてください");
