@@ -2,15 +2,27 @@
 import TaskCard from "@/components/tasks/TaskCard";
 import { useTaskStore } from "@/lib/store";
 import { getWeekDates } from "@/utils/date";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export default function TaskList() {
-  const { selectedDate, tasks, highlightTaskId, viewMode, addTask } =
-    useTaskStore();
+  const {
+    selectedDate,
+    tasks,
+    highlightTaskId,
+    viewMode,
+    addTask,
+    deleteTask,
+  } = useTaskStore();
+
+  const [isInitialFetch, setIsInitialFetch] = useState(true);
 
   useEffect(() => {
     const fetchTasks = async () => {
       try {
+        tasks.forEach((task) => {
+          if (task.id) deleteTask(task.id);
+        });
+
         const response = await fetch("http://127.0.0.1:5000//get_user_todos", {
           method: "GET",
           credentials: "include",
@@ -63,8 +75,12 @@ export default function TaskList() {
       }
     };
 
-    fetchTasks();
-  }, [addTask]);
+    // 最初の1回だけ実行する
+    if (isInitialFetch) {
+      fetchTasks();
+      setIsInitialFetch(false);
+    }
+  }, [addTask, deleteTask, tasks, isInitialFetch]);
 
   // 表示するタスクを決定
   const items =
