@@ -23,7 +23,7 @@ export default function TaskList() {
           if (task.id) deleteTask(task.id);
         });
 
-        const response = await fetch("http://127.0.0.1:5000//get_user_todos", {
+        const response = await fetch("http://127.0.0.1:5000/get_user_todos", {
           method: "GET",
           credentials: "include",
         });

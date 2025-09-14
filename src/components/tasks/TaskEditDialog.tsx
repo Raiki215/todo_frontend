@@ -13,7 +13,12 @@ type Props = {
   onSubmit?: (taskId: string, updates: Partial<Task>) => void;
 };
 
-export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props) {
+export default function TaskEditDialog({
+  open,
+  task,
+  onClose,
+  onSubmit,
+}: Props) {
   // ---- フォーム状態 ----
   const [title, setTitle] = useState("");
   const [dueDate, setDueDate] = useState<string>(""); // YYYY-MM-DD
@@ -29,7 +34,7 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
   // タスクが変更されたときにフォームを初期化（空の時は現在時刻をデフォルトに）
   useEffect(() => {
     if (!open || !task) return;
-    
+
     setTitle(task.title || "");
     setDueDate(task.date || getCurrentDate());
     setDueTime(task.time || getCurrentTime());
@@ -49,25 +54,55 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
     return () => document.removeEventListener("keydown", onKey);
   }, [open, title, dueDate, dueTime, importance, estimate, tagsInput]);
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!task) return;
 
-    const tags = tagsInput
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
+    const response = await fetch(
+      "http://127.0.0.1:5000/get_user_todos_update",
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          todo_id: task.id,
+          todo: title.trim(),
+          deadline: dueDate ? `${dueDate} ${dueTime || "00:00"}` : undefined,
+          priority: importance,
+          estimated_time: estimate ? Number(estimate) : undefined,
+          tags: tagsInput,
+        }),
+        credentials: "include",
+      }
+    );
 
-    const updates: Partial<Task> = {
-      title: title.trim() || "無題",
-      date: dueDate || task.date,
-      time: dueTime || undefined,
-      priority: importance,
-      duration: estimate ? Number(estimate) : undefined,
-      tags,
-    };
-
-    onSubmit?.(task.id, updates);
-    onClose();
+    if (!response.ok) {
+      alert("タスクの更新に失敗しました");
+      return;
+    } else if (response.status === 200) {
+      const data = await response.json();
+      const todo = data.data;
+      const tags = (todo.tags as string)
+        .split(",")
+        .map((s) => s.trim())
+        .filter(Boolean);
+      console.log(todo);
+      let date = "";
+      let time = "";
+      if (todo.deadline) {
+        const [d, t] = todo.deadline.split(" ");
+        date = d;
+        time = t ? t.substring(0, 5) : "00:00";
+      }
+      const updates: Partial<Task> = {
+        title: todo.todo.trim() || "無題",
+        date: date,
+        time: time || undefined,
+        priority: todo.priority,
+        duration: todo.estimated_time ? Number(todo.estimated_time) : undefined,
+        tags: tags,
+      };
+      onSubmit?.(task.id, updates);
+      onClose();
+    }
   };
 
   // Portal mount
@@ -77,7 +112,7 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
 
   // mountされていない、またはopenがfalseの時は何も表示しない
   if (!mounted || !open) return null;
-  
+
   if (!task) return null;
 
   return createPortal(
@@ -125,7 +160,7 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-sm text-gray-700">締切日</label>
-              <div 
+              <div
                 className="relative mt-1 cursor-pointer"
                 onClick={() => dateInputRef.current?.showPicker?.()}
               >
@@ -141,7 +176,7 @@ export default function TaskEditDialog({ open, task, onClose, onSubmit }: Props)
             </div>
             <div>
               <label className="block text-sm text-gray-700">時刻</label>
-              <div 
+              <div
                 className="relative mt-1 cursor-pointer"
                 onClick={() => timeInputRef.current?.showPicker?.()}
               >
