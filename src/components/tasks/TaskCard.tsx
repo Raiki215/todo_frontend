@@ -38,7 +38,7 @@ const glowAnimation = `
 
 /**
  * タスクカードコンポーネント
- * 
+ *
  * 個別のタスクを表示するカード
  * チェックボックス、タイトル、メタ情報、タグ、メニューで構成
  * ハイライト機能付き
@@ -64,11 +64,7 @@ export default function TaskCard({
 }) {
   const [checked, setChecked] = React.useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const {
-    deleteTask,
-    updateTask,
-    moveTaskToTomorrow,
-  } = useTaskStore();
+  const { deleteTask, updateTask, moveTaskToTomorrow } = useTaskStore();
 
   // 残り時間を計算
   const timeRemaining = calculateTimeRemaining(date, time);
@@ -103,8 +99,30 @@ export default function TaskCard({
     }
   };
 
-  const handleMoveToTomorrow = () => {
-    moveTaskToTomorrow(id);
+  const handleMoveToTomorrow = async () => {
+    const response = await fetch(
+      `http://127.0.0.1:5000/tomorrow_todo?todo_id=${id}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+    if (!response.ok) {
+      console.error("タスクの編集に失敗しました");
+      alert("タスクの編集に失敗しました");
+      return;
+    } else if (response.status === 200) {
+      const data = await response.json();
+      let todo_id: string = data.todo_id;
+      let deadline = new Date(data.deadline);
+      let date = "";
+      const year = deadline.getUTCFullYear();
+      const month = (deadline.getUTCMonth() + 1).toString().padStart(2, "0");
+      const day = deadline.getUTCDate().toString().padStart(2, "0");
+      date = `${year}-${month}-${day}`;
+      moveTaskToTomorrow(todo_id, date);
+    }
   };
 
   const highlightStyle = highlight
@@ -138,7 +156,7 @@ export default function TaskCard({
               />
               <TaskTitle title={title} isCompleted={checked} />
             </div>
-            
+
             {/* メタ情報（時間、優先度など） */}
             <TaskMeta
               isCompleted={checked}
@@ -148,7 +166,7 @@ export default function TaskCard({
               priority={priority}
               duration={duration}
             />
-            
+
             {/* タグ表示 */}
             <TaskTags tags={tags || []} />
           </div>

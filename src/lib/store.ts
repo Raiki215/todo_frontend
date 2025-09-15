@@ -53,7 +53,7 @@ interface AppState {
   /** タスクを更新 */
   updateTask: (taskId: string, updates: Partial<Task>) => void;
   /** タスクを翌日に移動 */
-  moveTaskToTomorrow: (taskId: string) => void;
+  moveTaskToTomorrow: (taskId: string, date: string) => void;
 
   // アクション（通知関連）
   /** 通知機能の有効/無効を切り替え */
@@ -139,15 +139,12 @@ export const useAppStore = create<AppState>((set, get) => {
         ),
       })),
 
-    moveTaskToTomorrow: (taskId) =>
+    moveTaskToTomorrow: (taskId, date) =>
       set((state) => {
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const tomorrowStr = tomorrow.toISOString().split("T")[0];
-
+        console.log("取得した日付---------" + date);
         return {
           tasks: state.tasks.map((task) =>
-            task.id === taskId ? { ...task, date: tomorrowStr } : task
+            task.id === taskId ? { ...task, date: date } : task
           ),
         };
       }),
