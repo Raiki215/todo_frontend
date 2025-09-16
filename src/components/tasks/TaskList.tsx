@@ -60,13 +60,21 @@ export default function TaskList() {
               const day = d.getUTCDate().toString().padStart(2, "0");
               date = `${year}-${month}-${day}`;
             }
+
+            // タグ形式の処理
+            let formattedTags = task.tags;
+
+            if (Array.isArray(task.tags) && task.tags.length > 0) {
+              formattedTags = task.tags;
+            }
+
             addTask({
               id: task.todo_id,
               title: task.todo,
               date: date,
               priority: task.priority,
               duration: Number(task.estimated_time),
-              tags: task.tags,
+              tags: formattedTags,
               time: time,
               status: Number(task.finish_flg) === 1 ? "完了" : "未完了",
             });

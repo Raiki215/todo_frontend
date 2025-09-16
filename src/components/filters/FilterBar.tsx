@@ -1,11 +1,35 @@
 // src/components/filters/FilterBar.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import { log } from "console";
 
 export default function FilterBar() {
   const { viewMode, setViewMode } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
+  const [tags, setTags] = useState<{ tag_id: string; tag: string }[]>([]);
+
+  useEffect(() => {
+    const getTags = async () => {
+      console.log("タグの取得開始");
+      try {
+        const response = await fetch("http://127.0.0.1:5000/get_tags", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (response.status === 200) {
+          const data = await response.json();
+          console.log("タグ一覧----------------------" + data.tags);
+          setTags(data.tags || []);
+        }
+      } catch (error) {
+        console.error("タグの取得に失敗しました:", error);
+      }
+    };
+
+    getTags();
+  }, []);
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -65,10 +89,12 @@ export default function FilterBar() {
         <label className="text-sm text-gray-600">
           タグ:
           <select className="w-full px-2 py-2 mt-1 text-sm border border-gray-300 rounded-lg">
-            <option>すべて</option>
-            <option>仕事</option>
-            <option>重要</option>
-            <option>健康</option>
+            <option value="">すべて</option>
+            {tags.map((tag) => (
+              <option key={tag.tag_id} value={tag.tag_id}>
+                {tag.tag}
+              </option>
+            ))}
           </select>
         </label>
         <label className="text-sm text-gray-600">
@@ -77,7 +103,6 @@ export default function FilterBar() {
             <option>すべて</option>
             <option>未完了</option>
             <option>完了</option>
-            <option>キャンセル</option>
           </select>
         </label>
         <label className="text-sm text-gray-600">
