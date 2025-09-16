@@ -112,6 +112,7 @@ export default function TaskList() {
             tags={it.tags}
             highlight={highlightTaskId === it.id}
             date={it.date}
+            status={it.status}
           />
         ))
       )}

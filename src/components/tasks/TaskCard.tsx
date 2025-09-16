@@ -52,6 +52,7 @@ export default function TaskCard({
   tags,
   highlight,
   date,
+  status,
 }: {
   id: string;
   title: string;
@@ -61,8 +62,9 @@ export default function TaskCard({
   tags?: string[];
   highlight?: boolean;
   date: string; // 残り時間計算のために必要
+  status: string;
 }) {
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = React.useState(status === "完了");
   const [showEditDialog, setShowEditDialog] = useState(false);
   const { deleteTask, updateTask, moveTaskToTomorrow } = useTaskStore();
 
