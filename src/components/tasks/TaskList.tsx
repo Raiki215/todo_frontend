@@ -22,8 +22,7 @@ export default function TaskList() {
         tasks.forEach((task) => {
           if (task.id) deleteTask(task.id);
         });
-
-        const response = await fetch("http://127.0.0.1:5000//get_user_todos", {
+        const response = await fetch("http://127.0.0.1:5000/get_user_todos", {
           method: "GET",
           credentials: "include",
         });
@@ -45,6 +44,11 @@ export default function TaskList() {
           }) => {
             let time = "";
             let date = "";
+            console.log(
+              `-------------${task.todo_id}:${Number(
+                task.finish_flg
+              )}-----------`
+            );
             if (task.deadline) {
               const d = new Date(task.deadline);
               const hours = d.getUTCHours().toString().padStart(2, "0");
@@ -64,7 +68,7 @@ export default function TaskList() {
               duration: Number(task.estimated_time),
               tags: task.tags,
               time: time,
-              status: task.finish_flg === 1 ? "完了" : "未完了",
+              status: Number(task.finish_flg) === 1 ? "完了" : "未完了",
             });
 
             console.log(task);
@@ -108,6 +112,7 @@ export default function TaskList() {
             tags={it.tags}
             highlight={highlightTaskId === it.id}
             date={it.date}
+            status={it.status}
           />
         ))
       )}

@@ -38,7 +38,7 @@ const glowAnimation = `
 
 /**
  * タスクカードコンポーネント
- * 
+ *
  * 個別のタスクを表示するカード
  * チェックボックス、タイトル、メタ情報、タグ、メニューで構成
  * ハイライト機能付き
@@ -52,6 +52,7 @@ export default function TaskCard({
   tags,
   highlight,
   date,
+  status,
 }: {
   id: string;
   title: string;
@@ -61,14 +62,11 @@ export default function TaskCard({
   tags?: string[];
   highlight?: boolean;
   date: string; // 残り時間計算のために必要
+  status: string;
 }) {
-  const [checked, setChecked] = React.useState(false);
+  const [checked, setChecked] = React.useState(status === "完了");
   const [showEditDialog, setShowEditDialog] = useState(false);
-  const {
-    deleteTask,
-    updateTask,
-    moveTaskToTomorrow,
-  } = useTaskStore();
+  const { deleteTask, updateTask, moveTaskToTomorrow } = useTaskStore();
 
   // 残り時間を計算
   const timeRemaining = calculateTimeRemaining(date, time);
@@ -97,14 +95,80 @@ export default function TaskCard({
     updateTask(taskId, updates);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm(`「${title}」を削除しますか？`)) {
-      deleteTask(id);
+      const response = await fetch(
+        "http://127.0.0.1:5000/get_user_todos_delete",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ todo_id: id }),
+        }
+      );
+      if (response.status === 201) {
+        deleteTask(id);
+      } else {
+        console.error("タスクの削除に失敗しました");
+        alert("タスクの削除に失敗しました");
+      }
     }
   };
 
-  const handleMoveToTomorrow = () => {
-    moveTaskToTomorrow(id);
+  const handleMoveToTomorrow = async () => {
+    const response = await fetch(
+      `http://127.0.0.1:5000/tomorrow_todo?todo_id=${id}`,
+      {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+      }
+    );
+    if (!response.ok) {
+      console.error("タスクの編集に失敗しました");
+      alert("タスクの編集に失敗しました");
+      return;
+    } else if (response.status === 200) {
+      const data = await response.json();
+      let todo_id: string = data.todo_id;
+      let deadline = new Date(data.deadline);
+      let date = "";
+      const year = deadline.getUTCFullYear();
+      const month = (deadline.getUTCMonth() + 1).toString().padStart(2, "0");
+      const day = deadline.getUTCDate().toString().padStart(2, "0");
+      date = `${year}-${month}-${day}`;
+      moveTaskToTomorrow(todo_id, date);
+    }
+  };
+
+  const handleCheckboxChange = async () => {
+    const newChecked = !checked; // チェック状態を切り替え
+    setChecked(newChecked);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/get_user_todos_finishflg_update`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            todo_id: id,
+            finish_flg: newChecked,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("タスクの状態更新に失敗しました");
+        alert("タスクの状態更新に失敗しました");
+        setChecked(!newChecked); // 状態を元に戻す
+      }
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+      alert("タスクの状態更新中にエラーが発生しました");
+      setChecked(!newChecked); // 状態を元に戻す
+    }
   };
 
   const highlightStyle = highlight
@@ -133,12 +197,12 @@ export default function TaskCard({
             <div className="flex items-center gap-3 mb-2">
               <TaskCheckbox
                 checked={checked}
-                onChange={() => setChecked(!checked)}
+                onChange={handleCheckboxChange}
                 taskId={id}
               />
               <TaskTitle title={title} isCompleted={checked} />
             </div>
-            
+
             {/* メタ情報（時間、優先度など） */}
             <TaskMeta
               isCompleted={checked}
@@ -148,7 +212,7 @@ export default function TaskCard({
               priority={priority}
               duration={duration}
             />
-            
+
             {/* タグ表示 */}
             <TaskTags tags={tags || []} />
           </div>
