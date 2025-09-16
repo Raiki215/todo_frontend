@@ -3,6 +3,7 @@
 import { useEffect, useId, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import { getCurrentDate, getCurrentTime } from "@/utils/dateTime";
+import TagsManager from "@/utils/TagsManager";
 
 /** ダイアログから返すドラフト型（保存先は後で配線） */
 export type TaskDraft = {
@@ -107,6 +108,7 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
       alert("ログインしてください");
     } else if (response.status === 201) {
       const data = await response.json();
+      const todo = data.todo;
       const draft: TaskDraft = {
         title: title.trim() || "無題",
         dueAt,
@@ -114,7 +116,22 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
         estimatedMinutes: estimate ? Number(estimate) : null,
         tags,
       };
-      console.log(data);
+
+      console.log("タスク作成: バックエンドからの応答:", todo);
+
+      // バックエンドから返されたタグ一覧があれば更新
+      if (todo.all_tags) {
+        try {
+          console.log("タスク作成: タグ一覧を更新します:", todo.all_tags);
+          TagsManager.updateTags(todo.all_tags);
+        } catch (error) {
+          console.error("タスク作成: タグの更新に失敗しました:", error);
+        }
+      } else {
+        console.warn(
+          "タスク作成: バックエンドからタグ一覧が返されませんでした"
+        );
+      }
       onSubmit?.(draft);
       onClose();
     }

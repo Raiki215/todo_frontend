@@ -16,6 +16,7 @@ import type { Task } from "@/lib/types";
 import { formatJapaneseDate } from "@/utils/date";
 import { generateTaskId } from "@/services/taskService";
 import recognizeVoice from "@/components/tasks/VoiceDialog";
+import TagsManager from "@/utils/TagsManager";
 
 export default function FloatingActionButtons() {
   const { selectedDate, addTask } = useAppStore();
@@ -87,6 +88,28 @@ export default function FloatingActionButtons() {
           time: time,
           status: "未完了",
         });
+
+        // バックエンドから返されたタグ一覧があれば更新
+        if (todo.all_tags) {
+          try {
+            console.log("音声タスク作成: タグ一覧を更新します:", todo.all_tags);
+            TagsManager.updateTags(todo.all_tags);
+          } catch (error) {
+            console.error("音声タスク作成: タグの更新に失敗しました:", error);
+          }
+        } else {
+          // 明示的にタグ一覧が返されなかった場合は再取得を試みる
+          try {
+            console.log("音声タスク作成: タグ一覧を再取得します");
+            const refreshedTags = await TagsManager.fetchTags();
+            if (refreshedTags.length > 0) {
+              TagsManager.updateTags(refreshedTags);
+            }
+          } catch (err) {
+            console.error("音声タスク作成: タグの再取得に失敗しました", err);
+          }
+        }
+
         alert("タスク登録成功");
       } else {
         alert("タスク登録失敗");

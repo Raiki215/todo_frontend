@@ -2,33 +2,37 @@
 "use client";
 import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
-import { log } from "console";
+import TagsManager from "@/utils/TagsManager";
+
+// タグ型の定義
+export interface Tag {
+  tag_id: string;
+  tag: string;
+}
 
 export default function FilterBar() {
   const { viewMode, setViewMode } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
-  const [tags, setTags] = useState<{ tag_id: string; tag: string }[]>([]);
+  const [tags, setTags] = useState<Tag[]>([]);
 
+  // TagsManagerにタグ更新関数を登録
   useEffect(() => {
-    const getTags = async () => {
-      console.log("タグの取得開始");
-      try {
-        const response = await fetch("http://127.0.0.1:5000/get_tags", {
-          method: "GET",
-          credentials: "include",
-        });
+    TagsManager.updateTagsFunction = setTags;
 
-        if (response.status === 200) {
-          const data = await response.json();
-          console.log("タグ一覧----------------------" + data.tags);
-          setTags(data.tags || []);
-        }
-      } catch (error) {
-        console.error("タグの取得に失敗しました:", error);
-      }
+    // コンポーネントがアンマウントされたときにクリア
+    return () => {
+      TagsManager.updateTagsFunction = null;
+    };
+  }, []);
+
+  // 初回のみタグを取得
+  useEffect(() => {
+    const loadInitialTags = async () => {
+      const initialTags = await TagsManager.fetchTags();
+      setTags(initialTags);
     };
 
-    getTags();
+    loadInitialTags();
   }, []);
 
   return (

@@ -4,6 +4,7 @@ import { useEffect, useId, useState, useRef } from "react";
 import { createPortal } from "react-dom";
 import type { Task } from "@/lib/types";
 import { getCurrentDate, getCurrentTime } from "@/utils/dateTime";
+import TagsManager from "@/utils/TagsManager";
 
 /** 編集ダイアログのプロパティ */
 type Props = {
@@ -100,6 +101,30 @@ export default function TaskEditDialog({
         duration: todo.estimated_time ? Number(todo.estimated_time) : undefined,
         tags: tags,
       };
+
+      // バックエンドから返されたタグ一覧があれば更新
+      if (todo.all_tags) {
+        try {
+          console.log("タスク編集: タグ一覧を更新します:", todo.all_tags);
+          TagsManager.updateTags(todo.all_tags);
+        } catch (error) {
+          console.error("タスク編集: タグの更新に失敗しました:", error);
+        }
+      } else {
+        console.warn(
+          "タスク編集: バックエンドからタグ一覧が返されませんでした"
+        );
+        // バックエンドからタグが返ってこなくても、念のため最新のタグ一覧を取得
+        try {
+          const refreshedTags = await TagsManager.fetchTags();
+          if (refreshedTags.length > 0) {
+            TagsManager.updateTags(refreshedTags);
+          }
+        } catch (err) {
+          console.error("タスク編集: 最新タグの再取得に失敗しました", err);
+        }
+      }
+
       onSubmit?.(task.id, updates);
       onClose();
     }
