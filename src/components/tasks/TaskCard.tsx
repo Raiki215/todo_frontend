@@ -93,9 +93,23 @@ export default function TaskCard({
     updateTask(taskId, updates);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (confirm(`「${title}」を削除しますか？`)) {
-      deleteTask(id);
+      const response = await fetch(
+        "http://127.0.0.1:5000/get_user_todos_delete",
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({ todo_id: id }),
+        }
+      );
+      if (response.status === 201) {
+        deleteTask(id);
+      } else {
+        console.error("タスクの削除に失敗しました");
+        alert("タスクの削除に失敗しました");
+      }
     }
   };
 
@@ -125,6 +139,36 @@ export default function TaskCard({
     }
   };
 
+  const handleCheckboxChange = async () => {
+    const newChecked = !checked; // チェック状態を切り替え
+    setChecked(newChecked);
+
+    try {
+      const response = await fetch(
+        `http://127.0.0.1:5000/get_user_todos_finishflg_update`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          credentials: "include",
+          body: JSON.stringify({
+            todo_id: id,
+            finish_flg: newChecked,
+          }),
+        }
+      );
+
+      if (!response.ok) {
+        console.error("タスクの状態更新に失敗しました");
+        alert("タスクの状態更新に失敗しました");
+        setChecked(!newChecked); // 状態を元に戻す
+      }
+    } catch (error) {
+      console.error("エラーが発生しました:", error);
+      alert("タスクの状態更新中にエラーが発生しました");
+      setChecked(!newChecked); // 状態を元に戻す
+    }
+  };
+
   const highlightStyle = highlight
     ? {
         animation: "glowPulse 2s ease-in-out",
@@ -151,7 +195,7 @@ export default function TaskCard({
             <div className="flex items-center gap-3 mb-2">
               <TaskCheckbox
                 checked={checked}
-                onChange={() => setChecked(!checked)}
+                onChange={handleCheckboxChange}
                 taskId={id}
               />
               <TaskTitle title={title} isCompleted={checked} />

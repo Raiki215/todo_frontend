@@ -44,6 +44,11 @@ export default function TaskList() {
           }) => {
             let time = "";
             let date = "";
+            console.log(
+              `-------------${task.todo_id}:${Number(
+                task.finish_flg
+              )}-----------`
+            );
             if (task.deadline) {
               const d = new Date(task.deadline);
               const hours = d.getUTCHours().toString().padStart(2, "0");
@@ -63,7 +68,7 @@ export default function TaskList() {
               duration: Number(task.estimated_time),
               tags: task.tags,
               time: time,
-              status: task.finish_flg === 1 ? "完了" : "未完了",
+              status: Number(task.finish_flg) === 1 ? "完了" : "未完了",
             });
 
             console.log(task);
