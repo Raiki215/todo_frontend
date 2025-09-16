@@ -76,21 +76,23 @@ export default function MiniCalendar({ onDateSelect }: MiniCalendarProps) {
   return (
     <div className="p-4 bg-white border border-gray-200 shadow-sm rounded-2xl">
       {/* ヘッダー（月移動） */}
-      <div className="flex items-center justify-between mb-2">
+      <div className="flex items-center justify-center gap-3 mb-3">
         <button
-          className="px-2 text-gray-600 hover:text-gray-900"
+          aria-label="前の月へ"
+          className="flex items-center justify-center text-gray-600 rounded-full w-9 h-9 sm:w-10 sm:h-10 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
           onClick={() => go(-1)}
         >
-          ‹
+          <span className="text-lg sm:text-xl">‹</span>
         </button>
-        <div className="font-medium">
+        <div className="font-medium text-base sm:text-lg text-gray-800 min-w-[6rem] text-center">
           {year}年{month + 1}月
         </div>
         <button
-          className="px-2 text-gray-600 hover:text-gray-900"
+          aria-label="次の月へ"
+          className="flex items-center justify-center text-gray-600 rounded-full w-9 h-9 sm:w-10 sm:h-10 hover:text-gray-900 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-gray-300"
           onClick={() => go(1)}
         >
-          ›
+          <span className="text-lg sm:text-xl">›</span>
         </button>
       </div>
 
