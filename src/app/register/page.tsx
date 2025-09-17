@@ -208,10 +208,15 @@ export default function RegisterPage() {
         aria-hidden
       />
 
+      {/* ブランド：SP=上中央 / PC=左上（大きめ） */}
+      <div className="absolute z-20 text-3xl font-bold tracking-tight text-black -translate-x-1/2 top-6 left-1/2 sm:left-4 sm:translate-x-0 sm:text-5xl">
+        Limitly
+      </div>
+
       {/* 中央カード */}
       <div className="relative flex items-center justify-center min-h-screen px-4">
         <div className="w-full max-w-md">
-          <div className="flex flex-col p-8 bg-white border border-gray-200 shadow-2xl rounded-none">
+          <div className="flex flex-col p-8 bg-white border border-gray-200 rounded-none shadow-2xl">
             <div className="text-center">
               <div className="flex flex-col">
                 <h2 className="text-3xl font-extrabold tracking-tight text-gray-900">
