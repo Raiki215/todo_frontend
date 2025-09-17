@@ -36,12 +36,12 @@ function UserMenu() {
       {/* ユーザーアバター */}
       <button
         onClick={() => setShowMenu(!showMenu)}
-        className="flex items-center space-x-2 text-sm bg-white rounded-full border border-gray-200 px-3 py-2 hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
+        className="flex items-center px-3 py-2 space-x-2 text-sm bg-white border border-gray-200 rounded-full hover:border-gray-300 focus:outline-none focus:ring-2 focus:ring-blue-500"
       >
-        <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center text-white text-xs font-medium">
+        <div className="flex items-center justify-center w-6 h-6 text-xs font-medium text-white bg-blue-500 rounded-full">
           {auth.user.name.charAt(0)}
         </div>
-        <span className="hidden sm:block text-gray-700">{auth.user.name}</span>
+        <span className="hidden text-gray-700 sm:block">{auth.user.name}</span>
         <svg
           className="w-4 h-4 text-gray-400"
           fill="none"
@@ -59,7 +59,7 @@ function UserMenu() {
 
       {/* ドロップダウンメニュー */}
       {showMenu && (
-        <div className="absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 z-50">
+        <div className="absolute right-0 z-50 w-48 mt-2 bg-white border border-gray-200 rounded-md shadow-lg">
           <div className="py-1">
             <div className="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
               <div className="font-medium text-gray-900">{auth.user.name}</div>
@@ -67,7 +67,7 @@ function UserMenu() {
             </div>
             <button
               onClick={handleLogout}
-              className="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-gray-900"
+              className="w-full px-4 py-2 text-sm text-left text-gray-700 hover:bg-gray-100 hover:text-gray-900"
             >
               ログアウト
             </button>
@@ -123,7 +123,7 @@ export default function AppHeader() {
             </button>
 
             {/* アプリタイトル */}
-            <h1 className="text-xl font-bold text-gray-900">TODO App</h1>
+            <h1 className="text-xl font-bold text-gray-900">Limitly</h1>
           </div>
 
           {/* 右側のメニューエリア */}
