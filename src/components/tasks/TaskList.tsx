@@ -16,6 +16,22 @@ export default function TaskList() {
 
   const [isInitialFetch, setIsInitialFetch] = useState(true);
 
+  // Service Workerの登録
+  useEffect(() => {
+    const registerServiceWorker = async () => {
+      if ("serviceWorker" in navigator) {
+        try {
+          const registration = await navigator.serviceWorker.register("/sw.js");
+          console.log("Service Worker 登録成功:", registration);
+        } catch (error) {
+          console.error("Service Worker 登録失敗:", error);
+        }
+      }
+    };
+
+    registerServiceWorker();
+  }, []);
+
   useEffect(() => {
     const fetchTasks = async () => {
       try {
@@ -87,9 +103,86 @@ export default function TaskList() {
       }
     };
 
+    const subscribeUser = async () => {
+      try {
+        // Service Workerが利用可能か確認
+        if (!("serviceWorker" in navigator) || !("PushManager" in window)) {
+          console.error("プッシュ通知がサポートされていません");
+          return;
+        }
+
+        const registration = await navigator.serviceWorker.ready;
+
+        // applicationServerKeyが設定されているか確認
+        let vapidPublicKey = process.env.NEXT_PUBLIC_VAPID_PUBLIC_KEY;
+        if (!vapidPublicKey) {
+          console.error("NEXT_PUBLIC_VAPID_PUBLIC_KEY が設定されていません");
+          return;
+        }
+
+        // ダブルクォーテーション、改行、空白を削除
+        vapidPublicKey = vapidPublicKey
+          .replace(/"/g, "")
+          .replace(/\n/g, "")
+          .replace(/\s/g, "");
+
+        // 標準Base64 → URLセーフBase64 に変換
+        const urlSafeVapidKey = vapidPublicKey
+          .replace(/\+/g, "-")
+          .replace(/\//g, "_")
+          .replace(/=+$/, "");
+
+        // Web Push標準の関数: URLセーフBase64文字列をUint8Arrayに変換
+        function urlBase64ToUint8Array(base64String: string): Uint8Array {
+          const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+          const base64 = (base64String + padding)
+            .replace(/-/g, "+")
+            .replace(/_/g, "/");
+
+          const rawData = window.atob(base64);
+          const outputArray = new Uint8Array(rawData.length);
+
+          for (let i = 0; i < rawData.length; ++i) {
+            outputArray[i] = rawData.charCodeAt(i);
+          }
+          return outputArray;
+        }
+
+        const applicationServerKey = urlBase64ToUint8Array(urlSafeVapidKey);
+
+        // Push通知のサブスクリプション登録
+        const subscription = await registration.pushManager.subscribe({
+          userVisibleOnly: true,
+          applicationServerKey: applicationServerKey as any,
+        });
+
+        // サーバーに登録
+        const response = await fetch(
+          "http://127.0.0.1:5000/save-subscription",
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ subscription }),
+            credentials: "include",
+          }
+        );
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          throw new Error(`サーバーエラー: ${response.status} ${errorText}`);
+        }
+
+        const result = await response.json();
+        console.log("Subscription saved!", result);
+      } catch (error) {
+        console.error("プッシュ通知の登録に失敗しました:", error);
+      }
+    };
+
     // 最初の1回だけ実行する
     if (isInitialFetch) {
       fetchTasks();
+      subscribeUser();
       setIsInitialFetch(false);
     }
   }, [addTask, deleteTask, tasks, isInitialFetch]);
