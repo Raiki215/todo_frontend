@@ -48,16 +48,19 @@ export default function Drawer({
         aria-modal="true"
         aria-label={title ?? "メニュー"}
       >
-        <div className="flex items-center justify-between h-14 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between px-2 border-b border-gray-200 h-14 sm:px-4">
           <button
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-800"
+            className="flex items-center justify-center w-10 h-10 -m-1 text-gray-500 rounded-full sm:-m-2 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
             aria-label="閉じる"
           >
-            ×
+            <span aria-hidden="true" className="text-2xl leading-none">
+              ×
+            </span>
           </button>
           <div className="text-sm font-semibold">{title ?? "メニュー"}</div>
-          <div className="w-6"></div> {/* 右側のバランス調整用スペーサー */}
+          <div className="w-10" aria-hidden></div>{" "}
+          {/* 右側のバランス調整用スペーサー */}
         </div>
         <div className="p-3 overflow-y-auto h-[calc(100%-56px)]">
           {children}
