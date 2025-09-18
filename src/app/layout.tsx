@@ -1,4 +1,5 @@
 import "@/styles/globals.css";
+import { AuthThemeProvider } from "@/hooks/useAuthTheme";
 
 export const metadata = {
   title: "TaskFlow",
@@ -13,7 +14,7 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className="min-h-screen bg-gray-50 text-gray-900 overflow-x-hidden">
-        {children}
+        <AuthThemeProvider>{children}</AuthThemeProvider>
       </body>
     </html>
   );
