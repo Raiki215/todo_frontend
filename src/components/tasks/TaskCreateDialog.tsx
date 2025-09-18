@@ -358,18 +358,78 @@ export default function TaskCreateDialog({ open, onClose, onSubmit }: Props) {
             </div>
             <div>
               <label className="block text-sm text-gray-700">時刻</label>
-              <div
-                className="relative mt-1 cursor-pointer"
-                onClick={() => timeInputRef.current?.showPicker?.()}
-              >
-                <input
-                  ref={timeInputRef}
-                  type="time"
-                  className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
-                  value={dueTime}
-                  onChange={(e) => setDueTime(e.target.value)}
-                />
-                <div className="absolute inset-0 rounded-lg pointer-events-none"></div>
+              <div className="space-y-2">
+                <div
+                  className="relative mt-1 cursor-pointer"
+                  onClick={() => timeInputRef.current?.showPicker?.()}
+                >
+                  <input
+                    ref={timeInputRef}
+                    type="time"
+                    className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg cursor-pointer hover:border-gray-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
+                    value={dueTime}
+                    onChange={(e) => setDueTime(e.target.value)}
+                  />
+                  <div className="absolute inset-0 rounded-lg pointer-events-none"></div>
+                </div>
+
+                {/* クイック締切設定ボタン */}
+                <div className="flex space-x-1">
+                  <button
+                    onClick={() => {
+                      const now = new Date();
+                      now.setHours(now.getHours() + 1);
+
+                      const year = now.getFullYear();
+                      const month = String(now.getMonth() + 1).padStart(2, "0");
+                      const day = String(now.getDate()).padStart(2, "0");
+                      const hours = String(now.getHours()).padStart(2, "0");
+                      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+                      setDueDate(`${year}-${month}-${day}`);
+                      setDueTime(`${hours}:${minutes}`);
+                    }}
+                    className="flex-1 px-1 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    1時間後
+                  </button>
+                  <button
+                    onClick={() => {
+                      const now = new Date();
+                      now.setMinutes(now.getMinutes() + 30);
+
+                      const year = now.getFullYear();
+                      const month = String(now.getMonth() + 1).padStart(2, "0");
+                      const day = String(now.getDate()).padStart(2, "0");
+                      const hours = String(now.getHours()).padStart(2, "0");
+                      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+                      setDueDate(`${year}-${month}-${day}`);
+                      setDueTime(`${hours}:${minutes}`);
+                    }}
+                    className="flex-1 px-1 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    30分後
+                  </button>
+                  <button
+                    onClick={() => {
+                      const now = new Date();
+                      now.setMinutes(now.getMinutes() + 5);
+
+                      const year = now.getFullYear();
+                      const month = String(now.getMonth() + 1).padStart(2, "0");
+                      const day = String(now.getDate()).padStart(2, "0");
+                      const hours = String(now.getHours()).padStart(2, "0");
+                      const minutes = String(now.getMinutes()).padStart(2, "0");
+
+                      setDueDate(`${year}-${month}-${day}`);
+                      setDueTime(`${hours}:${minutes}`);
+                    }}
+                    className="flex-1 px-1 py-1 text-xs text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50"
+                  >
+                    5分後
+                  </button>
+                </div>
               </div>
             </div>
           </div>
