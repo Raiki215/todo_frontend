@@ -155,16 +155,18 @@ export default function TaskEditDialog({
         className="absolute left-1/2 top-1/2 w-[92vw] max-w-[560px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-gray-200 bg-white shadow-xl transition-transform scale-100"
       >
         {/* header */}
-        <div className="flex items-center justify-between h-12 px-4 border-b border-gray-200">
+        <div className="flex items-center justify-between h-12 px-2 border-b border-gray-200 sm:px-4">
           <div id={`${dialogId}-title`} className="text-sm font-semibold">
             タスクを編集
           </div>
           <button
             onClick={onClose}
             aria-label="閉じる"
-            className="text-gray-500 hover:text-gray-800"
+            className="flex items-center justify-center w-10 h-10 -m-1 text-gray-500 rounded-full sm:-m-2 hover:text-gray-800 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-blue-300"
           >
-            ×
+            <span aria-hidden="true" className="text-2xl leading-none">
+              ×
+            </span>
           </button>
         </div>
 
