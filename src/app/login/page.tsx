@@ -22,6 +22,9 @@ export default function LoginPage() {
 
   // 既ログインならホームへ
   useEffect(() => {
+    if (auth?.isLoading) {
+      return;
+    }
     if (auth?.isAuthenticated && auth?.user) {
       router.replace("/");
     }
