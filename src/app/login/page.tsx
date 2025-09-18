@@ -136,12 +136,17 @@ export default function LoginPage() {
     } catch {}
   }, [theme]);
 
-  // 既ログインならホームへ
+  // 既にログイン済みの状態が確認できたらホームへリダイレクト
   useEffect(() => {
-    if (auth?.isAuthenticated && auth?.user) {
-      router.push("/");
+    // 認証状態の初期化中は判断を控える
+    if (auth?.isLoading) {
+      return;
     }
-  }, [auth?.isAuthenticated, auth?.user, router]);
+
+    if (auth?.isAuthenticated && auth?.user) {
+      router.replace("/");
+    }
+  }, [auth?.isAuthenticated, auth?.isLoading, auth?.user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -158,8 +163,9 @@ export default function LoginPage() {
           await initializeAuth();
         } catch {}
         // 状態反映を待ってから遷移（元実装に近い挙動）
+        // router.replace を使用して履歴にエントリを残さない
         setTimeout(() => {
-          router.push("/");
+          router.replace("/");
         }, 100);
       }
     } finally {

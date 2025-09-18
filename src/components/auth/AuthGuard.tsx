@@ -19,19 +19,30 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   const router = useRouter();
   const { auth, initializeAuth } = useAppStore();
   const [hasInitialized, setHasInitialized] = useState(false);
+  const [isVerifyingAuth, setIsVerifyingAuth] = useState(true);
 
   useEffect(() => {
-    // 既に認証済みの場合は初期化をスキップ
-    if (auth.isAuthenticated && auth.user) {
-      setHasInitialized(true);
-      return;
-    }
+    // ページの最初のロード時に認証状態を確認する
+    const verifyAuth = async () => {
+      setIsVerifyingAuth(true);
 
-    // 初回マウント時のみ認証を初期化
-    if (!hasInitialized && !auth.isLoading) {
-      setHasInitialized(true);
-      initializeAuth();
-    }
+      // 既に認証済みの場合は初期化をスキップ
+      if (auth.isAuthenticated && auth.user) {
+        setHasInitialized(true);
+        setIsVerifyingAuth(false);
+        return;
+      }
+
+      // 初回マウント時のみ認証を初期化
+      if (!hasInitialized && !auth.isLoading) {
+        setHasInitialized(true);
+        await initializeAuth();
+      }
+
+      setIsVerifyingAuth(false);
+    };
+
+    verifyAuth();
   }, [
     initializeAuth,
     hasInitialized,
@@ -46,14 +57,14 @@ export default function AuthGuard({ children }: AuthGuardProps) {
       return;
     }
 
-    // 未認証の場合はログインページにリダイレクト
-    if (!auth.isAuthenticated) {
+    // 未認証かつ初期化が完了している場合のみログインページにリダイレクト
+    if (!auth.isAuthenticated && hasInitialized) {
       router.push("/login");
     }
-  }, [auth.isAuthenticated, auth.isLoading, router]);
+  }, [auth.isAuthenticated, auth.isLoading, hasInitialized, router]);
 
   // ローディング中の表示
-  if (auth.isLoading) {
+  if (auth.isLoading || isVerifyingAuth) {
     return (
       <div className="flex items-center justify-center min-h-screen bg-gray-50">
         <div className="text-center">
@@ -65,7 +76,7 @@ export default function AuthGuard({ children }: AuthGuardProps) {
   }
 
   // 未認証の場合は何も表示しない（リダイレクト中）
-  if (!auth.isAuthenticated) {
+  if (!auth.isAuthenticated && hasInitialized) {
     return null;
   }
 
