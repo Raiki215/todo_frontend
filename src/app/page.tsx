@@ -14,9 +14,18 @@ import FloatingActionButtons from "@/components/common/FloatingActionButtons";
 import AuthGuard from "@/components/auth/AuthGuard";
 import { useAppStore } from "@/lib/store";
 import { formatJapaneseDate } from "@/utils/date";
+import { useEffect } from "react";
 
 export default function HomePage() {
   const { selectedDate, viewMode } = useAppStore();
+
+  useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js").then(() => {
+        console.log("SW registered");
+      });
+    }
+  }, []);
 
   return (
     <AuthGuard>

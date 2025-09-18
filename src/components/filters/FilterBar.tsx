@@ -1,11 +1,39 @@
 // src/components/filters/FilterBar.tsx
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useAppStore } from "@/lib/store";
+import TagsManager from "@/utils/TagsManager";
+
+// タグ型の定義
+export interface Tag {
+  tag_id: string;
+  tag: string;
+}
 
 export default function FilterBar() {
   const { viewMode, setViewMode } = useAppStore();
   const [showFilters, setShowFilters] = useState(false);
+  const [tags, setTags] = useState<Tag[]>([]);
+
+  // TagsManagerにタグ更新関数を登録
+  useEffect(() => {
+    TagsManager.updateTagsFunction = setTags;
+
+    // コンポーネントがアンマウントされたときにクリア
+    return () => {
+      TagsManager.updateTagsFunction = null;
+    };
+  }, []);
+
+  // 初回のみタグを取得
+  useEffect(() => {
+    const loadInitialTags = async () => {
+      const initialTags = await TagsManager.fetchTags();
+      setTags(initialTags);
+    };
+
+    loadInitialTags();
+  }, []);
 
   return (
     <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
@@ -65,10 +93,12 @@ export default function FilterBar() {
         <label className="text-sm text-gray-600">
           タグ:
           <select className="w-full px-2 py-2 mt-1 text-sm border border-gray-300 rounded-lg">
-            <option>すべて</option>
-            <option>仕事</option>
-            <option>重要</option>
-            <option>健康</option>
+            <option value="">すべて</option>
+            {tags.map((tag) => (
+              <option key={tag.tag_id} value={tag.tag_id}>
+                {tag.tag}
+              </option>
+            ))}
           </select>
         </label>
         <label className="text-sm text-gray-600">
@@ -77,7 +107,6 @@ export default function FilterBar() {
             <option>すべて</option>
             <option>未完了</option>
             <option>完了</option>
-            <option>キャンセル</option>
           </select>
         </label>
         <label className="text-sm text-gray-600">

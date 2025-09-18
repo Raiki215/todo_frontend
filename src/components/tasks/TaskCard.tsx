@@ -9,6 +9,7 @@ import TaskTitle from "./TaskTitle";
 import TaskMeta from "./TaskMeta";
 import TaskTags from "./TaskTags";
 import type { Task } from "@/lib/types";
+import TagsManager from "@/utils/TagsManager";
 
 // グラデーション風の発光アニメーション
 const glowAnimation = `
@@ -108,6 +109,17 @@ export default function TaskCard({
       );
       if (response.status === 201) {
         deleteTask(id);
+
+        // タスク削除後にタグ一覧を再取得して更新
+        try {
+          console.log("タスク削除: タグ一覧を再取得します");
+          const refreshedTags = await TagsManager.fetchTags();
+          if (refreshedTags.length > 0) {
+            TagsManager.updateTags(refreshedTags);
+          }
+        } catch (err) {
+          console.error("タスク削除後のタグ更新に失敗しました", err);
+        }
       } else {
         console.error("タスクの削除に失敗しました");
         alert("タスクの削除に失敗しました");
@@ -159,7 +171,18 @@ export default function TaskCard({
         }
       );
 
-      if (!response.ok) {
+      if (response.ok) {
+        // 状態更新に成功した場合のみタグを更新
+        try {
+          // タスク完了状態変更時にもタグを再取得
+          const refreshedTags = await TagsManager.fetchTags();
+          if (refreshedTags.length > 0) {
+            TagsManager.updateTags(refreshedTags);
+          }
+        } catch (err) {
+          console.error("タスク状態変更後のタグ更新に失敗しました", err);
+        }
+      } else {
         console.error("タスクの状態更新に失敗しました");
         alert("タスクの状態更新に失敗しました");
         setChecked(!newChecked); // 状態を元に戻す
