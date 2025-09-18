@@ -123,7 +123,7 @@ export default function AppHeader() {
             </button>
 
             {/* アプリタイトル */}
-            <h1 className="text-xl font-bold text-gray-900">Limitly</h1>
+            <h1 className="text-xl font-bold text-gray-900">ChronoVoice</h1>
           </div>
 
           {/* 右側のメニューエリア */}
