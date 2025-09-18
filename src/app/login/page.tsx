@@ -23,9 +23,9 @@ export default function LoginPage() {
   // 既ログインならホームへ
   useEffect(() => {
     if (auth?.isAuthenticated && auth?.user) {
-      router.push("/");
+      router.replace("/");
     }
-  }, [auth?.isAuthenticated, auth?.user, router]);
+  }, [auth?.isAuthenticated, auth?.isLoading, auth?.user, router]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -42,8 +42,9 @@ export default function LoginPage() {
           await initializeAuth();
         } catch {}
         // 状態反映を待ってから遷移（元実装に近い挙動）
+        // router.replace を使用して履歴にエントリを残さない
         setTimeout(() => {
-          router.push("/");
+          router.replace("/");
         }, 100);
       }
     } finally {
