@@ -11,6 +11,9 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { authService } from "@/services/authService";
 import { useAppStore } from "@/lib/store";
+import { useAuthTheme } from "@/hooks/useAuthTheme";
+import AuthBackground from "@/components/auth/AuthBackground";
+import AuthThemeSettings from "@/components/auth/AuthThemeSettings";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -26,60 +29,7 @@ export default function RegisterPage() {
   const router = useRouter();
   const { auth } = useAppStore();
 
-  // Vanta Fog refs
-  const vantaRef = useRef<HTMLDivElement | null>(null);
-  const vantaEffectRef = useRef<any>(null);
-
-  // Vanta Fog 初期化（ログイン画面と同仕様）
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const prefersReduce = window.matchMedia?.(
-          "(prefers-reduced-motion: reduce)"
-        )?.matches;
-        if (prefersReduce) return;
-
-        const THREE = await import("three");
-        const VANTA = await import("vanta/dist/vanta.fog.min");
-
-        if (!mounted || !vantaRef.current) return;
-
-        if (vantaEffectRef.current) {
-          vantaEffectRef.current.destroy();
-          vantaEffectRef.current = null;
-        }
-
-        const createVanta = (VANTA as any).default;
-        vantaEffectRef.current = createVanta({
-          el: vantaRef.current,
-          THREE,
-          mouseControls: true,
-          touchControls: true,
-          gyroControls: false,
-          minHeight: 200.0,
-          minWidth: 200.0,
-          highlightColor: 0xffffff,
-          midtoneColor: 0x00fff0,
-          lowlightColor: 0x2d00fc,
-          baseColor: 0xfafafa,
-          blurFactor: 0.6,
-          speed: 1.2,
-          zoom: 1.0,
-        });
-      } catch (e) {
-        console.error("Vanta init error (register):", e);
-      }
-    })();
-
-    return () => {
-      mounted = false;
-      if (vantaEffectRef.current) {
-        vantaEffectRef.current.destroy();
-        vantaEffectRef.current = null;
-      }
-    };
-  }, []);
+  const { theme } = useAuthTheme();
 
   // 既にログイン済みの場合はメインページにリダイレクト
   useEffect(() => {
@@ -152,16 +102,7 @@ export default function RegisterPage() {
   if (success) {
     return (
       <div className="relative min-h-screen">
-        {/* 背景層 */}
-        <div
-          ref={vantaRef}
-          className="absolute inset-0 -z-10"
-          style={{
-            background:
-              "radial-gradient(1200px 600px at 10% 10%, #ffffff 0%, #e8f1ff 30%, #dfe9ff 60%, #cfd6ff 100%)",
-          }}
-          aria-hidden
-        />
+        <AuthBackground />
         <div className="flex items-center justify-center min-h-screen px-4 py-12 sm:px-6 lg:px-8">
           <div className="w-full max-w-md space-y-8">
             <div className="text-center">
@@ -197,16 +138,9 @@ export default function RegisterPage() {
 
   return (
     <div className="relative min-h-screen">
-      {/* 背景層：Vanta */}
-      <div
-        ref={vantaRef}
-        className="absolute inset-0 -z-10"
-        style={{
-          background:
-            "radial-gradient(1200px 600px at 10% 10%, #ffffff 0%, #e8f1ff 30%, #dfe9ff 60%, #cfd6ff 100%)",
-        }}
-        aria-hidden
-      />
+      <AuthBackground />
+
+      <AuthThemeSettings />
 
       {/* ブランド：SP=上中央 / PC=左上（大きめ） */}
       <div className="absolute z-20 text-3xl font-bold tracking-tight text-black -translate-x-1/2 top-6 left-1/2 sm:left-4 sm:translate-x-0 sm:text-5xl">
@@ -313,7 +247,8 @@ export default function RegisterPage() {
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="relative w-full px-4 py-2 font-medium text-white transition rounded-none shadow-lg group bg-blue-600/90 hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:cursor-not-allowed disabled:opacity-60"
+                    className="relative w-full px-4 py-2 font-medium text-white transition rounded-none shadow-lg group focus:outline-none focus:ring-2 focus:ring-white/40 disabled:cursor-not-allowed disabled:opacity-60 hover:brightness-110"
+                    style={{ backgroundColor: theme.primary }}
                   >
                     {isSubmitting ? (
                       <span className="flex items-center justify-center gap-2">
