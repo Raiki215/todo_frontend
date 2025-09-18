@@ -144,7 +144,7 @@ export default function RegisterPage() {
 
       {/* ブランド：SP=上中央 / PC=左上（大きめ） */}
       <div className="absolute z-20 text-3xl font-bold tracking-tight text-black -translate-x-1/2 top-6 left-1/2 sm:left-4 sm:translate-x-0 sm:text-5xl">
-        Limitly
+        ChronoVoice
       </div>
 
       {/* 中央カード */}
