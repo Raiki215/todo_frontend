@@ -3,7 +3,7 @@
 Next.js 15.5.2 で構築されたモダンなタスク管理アプリケーションです。
 
 ## デモ動画
-- [YouTube - Demo](https://studio.youtube.com/video/ya1asK3vijU/edit)
+- [YouTube - Demo](https://www.youtube.com/watch?v=ya1asK3vijU)
 - [モバイル画面のみ](https://youtu.be/S5VumNoxEV8)
 
 ## 🚀 機能
