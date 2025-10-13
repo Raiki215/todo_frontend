@@ -2,6 +2,10 @@
 
 Next.js 15.5.2 で構築されたモダンなタスク管理アプリケーションです。
 
+## デモ動画
+- [YouTube - Demo](https://studio.youtube.com/video/ya1asK3vijU/edit)
+- [モバイル画面のみ](https://youtu.be/S5VumNoxEV8)
+
 ## 🚀 機能
 
 - ✅ タスクの作成、編集、削除
